@@ -102,14 +102,6 @@
         }
     },
     "variables": {
-        "dnsLabelPrefix": "[concat(toLower(parameters('dnsLabelPrefix')),copyindex())]",
-        "virtualMachineName": "[if(equals(copyIndex(),0),parameters('dmgrVMName'),concat(parameters('managedNodeVMPrefix'), copyIndex()))]",
-        "publicIPAddressName": "[concat(variables('virtualMachineName'), '-ip')]",
-        "networkInterfaceName": "[concat(variables('virtualMachineName'), '-if')]",
-        "diskName": "[concat(variables('virtualMachineName'), '-disk')]",
-        "extensionName": "[concat(variables('virtualMachineName'), '/CustomScript')]",
-        "publicIPAddressRef": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
-        "networkInterfaceRef": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
         "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
@@ -218,7 +210,7 @@
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-06-01",
-            "name": "[variables('publicIPAddressName')]",
+            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-ip')]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "publicIPLoop",
@@ -227,14 +219,14 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings":{
-                    "domainNameLabel":"[variables('dnsLabelPrefix')]"
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')), copyIndex())]"
                 }
             }
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-06-01",
-            "name": "[variables('networkInterfaceName')]",
+            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-if')]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "nicLoop",
@@ -251,7 +243,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[variables('publicIPAddressRef')]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-ip'))]"
                             },
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
@@ -264,7 +256,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-03-01",
-            "name": "[variables('virtualMachineName')]",
+            "name": "[if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex()))]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "virtualMachineLoop",
@@ -285,7 +277,7 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "[variables('diskName')]",
+                        "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-disk')]",
                         "createOption": "FromImage",
                         "managedDisk": {
                             "storageAccountType": "[parameters('osDiskType')]"
@@ -293,14 +285,14 @@
                     }
                 },
                 "osProfile": {
-                    "computerName": "[variables('virtualMachineName')]",
+                    "computerName": "[if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex()))]",
                     "adminUsername": "[parameters('vmAdminId')]",
                     "adminPassword": "[parameters('vmAdminPwd')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[variables('networkInterfaceRef')]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-if'))]"
                         }
                     ]
                 }
@@ -309,7 +301,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-03-01",
-            "name": "[variables('extensionName')]",
+            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '/CustomScript')]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "virtualMachineExtensionLoop",
