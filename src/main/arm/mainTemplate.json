@@ -45,7 +45,7 @@
         },
 		"numberOfNodes": {
 			"type": "int",
-			"defaultValue": 2,
+			"defaultValue": 4,
 			"minValue": 2,
 			"maxValue": 5,
 			"metadata": {
@@ -309,14 +309,36 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-03-01",
-            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '/CustomScript')]",
+            "name": "[concat(parameters('dmgrVMName'), '/CustomScript')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('dmgrVMName'))]"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "settings": {
+                    "fileUris": [
+                        "[uri(variables('scriptLocation'), concat(variables('scriptName'), parameters('_artifactsLocationSasToken')))]"
+                    ],
+                    "commandToExecute": "[concat(variables('commandToExecute1'), variables('commandToExecute2'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-03-01",
+            "name": "[concat(parameters('managedNodeVMPrefix'), copyIndex(1), '/CustomScript')]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "virtualMachineExtensionLoop",
-				"count": "[parameters('numberOfNodes')]"
+				"count": "[sub(parameters('numberOfNodes'), 1)]"
 			},
             "dependsOn": [
-                "virtualMachineLoop"
+                "virtualMachineLoop",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('dmgrVMName'), 'CustomScript')]"
             ],
             "properties": {
                 "autoUpgradeMinorVersion": true,
