@@ -11,7 +11,7 @@ db2DBUserPwd=$8 #Database user password of IBM DB2 Server
 scriptLocation=$9 #Script location ends in a trailing slash
 
 # Variables
-createDSFileUri="$scriptLocation"db2/create-ds.py
+createDSFileUri="$scriptLocation"create-ds.py
 createDSFileName=create-ds.py
 jdbcDriverPath="$wasRootPath"/db2/java
 

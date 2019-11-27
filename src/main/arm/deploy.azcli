@@ -78,7 +78,7 @@ if [ -z "$deploymentName" ] || [ ! -f "$installKitFile" ] || [ -z "$subscription
 fi
 
 #templateFile Path - template file to be used
-templateFilePath="../arm/mainTemplate.json"
+templateFilePath="mainTemplate.json"
 
 if [ ! -f "$templateFilePath" ]; then
 	echo "$templateFilePath not found"
@@ -86,7 +86,7 @@ if [ ! -f "$templateFilePath" ]; then
 fi
 
 #parameter file path
-parametersFilePath="../arm/parameters.json"
+parametersFilePath="parameters.json"
 
 if [ ! -f "$parametersFilePath" ]; then
 	echo "$parametersFilePath not found"

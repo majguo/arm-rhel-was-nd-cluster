@@ -76,7 +76,7 @@ sed -i "s/com.ibm.SOAP.loginPassword=/com.ibm.SOAP.loginPassword=${adminPassword
 
 # Configure JDBC provider and data soruce for IBM DB2 Server if required
 if [ ! -z "$db2ServerName" ] && [ ! -z "$db2ServerPortNumber" ] && [ ! -z "$db2DBName" ] && [ ! -z "$db2DBUserName" ] && [ ! -z "$db2DBUserPwd" ]; then
-    wget "$scriptLocation"db2/create-ds.sh
+    wget "$scriptLocation"create-ds.sh
     chmod u+x create-ds.sh
     ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
 fi
