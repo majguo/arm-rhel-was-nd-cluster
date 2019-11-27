@@ -1,5 +1,5 @@
 #!/bin/sh
-while getopts "l:u:p:m:c:n:t:d:i:s:a:" opt; do
+while getopts "l:u:p:m:c:d:a:" opt; do
     case $opt in
         l)
             imKitLocation=$OPTARG #SAS URI of the IBM Installation Manager install kit in Azure Storage
@@ -16,26 +16,18 @@ while getopts "l:u:p:m:c:n:t:d:i:s:a:" opt; do
         c)
             adminPassword=$OPTARG #Password for administrating WebSphere Admin Console
         ;;
-        n)
-            db2ServerName=$OPTARG #Host name/IP address of IBM DB2 Server
-        ;;
-        t)
-            db2ServerPortNumber=$OPTARG #Server port number of IBM DB2 Server
-        ;;
         d)
-            db2DBName=$OPTARG #Database name of IBM DB2 Server
-        ;;
-        i)
-            db2DBUserName=$OPTARG #Database user name of IBM DB2 Server
-        ;;
-        s)
-            db2DBUserPwd=$OPTARG #Database user password of IBM DB2 Server
+            dmgr=$OPTARG #Flag indicating whether to install deployment manager
         ;;
         a)
             scriptLocation=$OPTARG #Script location ends in a trailing slash
         ;;
     esac
 done
+
+# Turn off firewall
+systemctl stop firewalld
+systemctl disable firewalld
 
 # Variables
 imKitName=agent.installer.linux.gtk.x86_64_1.9.0.20190715_0328.zip
@@ -59,52 +51,8 @@ unzip "$imKitName" -d im_installer
     -installationDirectory /opt/IBM/WebSphere/ND/V9/ -sharedResourcesDirectory /opt/IBM/IMShared/ \
     -secureStorageFile storage_file -acceptLicense -showProgress
 
-# Create standalone application profile
-/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName AppSrv1 -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/default \
-    -enableAdminSecurity true -adminUserName "$adminUserName" -adminPassword "$adminPassword"
-
-# Add credentials to "soap.client.props" so they can be read by relative commands if required
-soapClientProps=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/properties/soap.client.props
-sed -i "s/com.ibm.SOAP.securityEnabled=false/com.ibm.SOAP.securityEnabled=true/g" "$soapClientProps"
-sed -i "s/com.ibm.SOAP.loginUserid=/com.ibm.SOAP.loginUserid=${adminUserName}/g" "$soapClientProps"
-sed -i "s/com.ibm.SOAP.loginPassword=/com.ibm.SOAP.loginPassword=${adminPassword}/g" "$soapClientProps"
-# Encrypt com.ibm.SOAP.loginPassword
-/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
-
-# Create and start server
-/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1
-
-# Configure JDBC provider and data soruce for IBM DB2 Server if required
-if [ ! -z "$db2ServerName" ] && [ ! -z "$db2ServerPortNumber" ] && [ ! -z "$db2DBName" ] && [ ! -z "$db2DBUserName" ] && [ ! -z "$db2DBUserPwd" ]; then
-    wget "$scriptLocation"create-ds.sh
-    chmod u+x create-ds.sh
-    ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
+if $dmgr; then
+    touch dmgr.txt
+else
+    touch nothing.txt
 fi
-
-# Add systemd unit file for websphere.service
-srvName=websphere
-websphereSrv=/etc/systemd/system/${srvName}.service
-echo "[Unit]" > "$websphereSrv"
-echo "Description=IBM WebSphere Application Server" >> "$websphereSrv"
-echo "[Service]" >> "$websphereSrv"
-echo "Type=forking" >> "$websphereSrv"
-echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1" >> "$websphereSrv"
-echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1" >> "$websphereSrv"
-echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/logs/server1/server1.pid" >> "$websphereSrv"
-echo "SuccessExitStatus=143 0" >> "$websphereSrv"
-echo "[Install]" >> "$websphereSrv"
-echo "WantedBy=default.target" >> "$websphereSrv"
-chmod a+x "$websphereSrv"
-
-# Enable and start websphere service
-/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1
-systemctl daemon-reload
-systemctl enable "$srvName"
-systemctl start "$srvName"
-
-# Open ports by adding iptables rules
-firewall-cmd --zone=public --add-port=9060/tcp --permanent
-firewall-cmd --zone=public --add-port=9080/tcp --permanent
-firewall-cmd --zone=public --add-port=9043/tcp --permanent
-firewall-cmd --zone=public --add-port=9443/tcp --permanent
-firewall-cmd --reload

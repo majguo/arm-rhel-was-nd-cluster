@@ -115,7 +115,9 @@
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "scriptName": "install.sh",
-        "commandToExecute1": "[concat('sh ',variables('scriptName'),' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -a \"',variables('scriptLocation'),'\"')]",
+        "addNode": "add-node.sh",
+        "createCluster": "create-cluster.sh",
+        "commandToExecute1": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -a \"',variables('scriptLocation'),'\"')]",
         "commandToExecute2": "[if(bool(parameters('connectToDB2Server')),concat(' -n \"',parameters('db2ConnConfig').serverName,'\" -t ',parameters('db2ConnConfig').portNumber,' -d ',parameters('db2ConnConfig').dBName,' -i ',parameters('db2ConnConfig').dBUserName,' -s ',parameters('db2ConnConfig').dBUserPwd),' -n  -t  -d  -i  -s ')]"
     },
     "resources": [
@@ -305,40 +307,18 @@
                     ]
                 }
             }
-        },        
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2019-03-01",
-            "name": "[concat(parameters('dmgrVMName'), '/CustomScript')]",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('dmgrVMName'))]"
-            ],
-            "properties": {
-                "autoUpgradeMinorVersion": true,
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "settings": {
-                    "fileUris": [
-                        "[uri(variables('scriptLocation'), concat(variables('scriptName'), parameters('_artifactsLocationSasToken')))]"
-                    ],
-                    "commandToExecute": "[concat(variables('commandToExecute1'), variables('commandToExecute2'))]"
-                }
-            }
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-03-01",
-            "name": "[concat(parameters('managedNodeVMPrefix'), copyIndex(1), '/CustomScript')]",
+            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '/install')]",
             "location": "[parameters('location')]",
             "copy": {
-				"name": "virtualMachineExtensionLoop",
-				"count": "[sub(parameters('numberOfNodes'), 1)]"
+				"name": "vmExtensionInstallLoop",
+				"count": "[parameters('numberOfNodes')]"
 			},
             "dependsOn": [
-                "virtualMachineLoop",
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('dmgrVMName'), 'CustomScript')]"
+                "virtualMachineLoop"
             ],
             "properties": {
                 "autoUpgradeMinorVersion": true,
@@ -349,9 +329,55 @@
                     "fileUris": [
                         "[uri(variables('scriptLocation'), concat(variables('scriptName'), parameters('_artifactsLocationSasToken')))]"
                     ],
-                    "commandToExecute": "[concat(variables('commandToExecute1'), variables('commandToExecute2'))]"
+                    "commandToExecute": "[concat('sh ',variables('scriptName'), variables('commandToExecute1'), ' -d ', equals(copyIndex(), 0))]"
                 }
             }
-        }        
+        }, 
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-03-01",
+            "name": "[concat(parameters('managedNodeVMPrefix'), copyIndex(1), '/addnode')]",
+            "location": "[parameters('location')]",
+            "copy": {
+				"name": "vmExtensionAddNodeLoop",
+				"count": "[sub(parameters('numberOfNodes'), 1)]"
+			},
+            "dependsOn": [
+                "vmExtensionInstallLoop"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "settings": {
+                    "fileUris": [
+                        "[uri(variables('scriptLocation'), concat(variables('addNode'), parameters('_artifactsLocationSasToken')))]"
+                    ],
+                    "commandToExecute": "[concat('sh ',variables('addNode'), variables('commandToExecute1'), variables('commandToExecute2'))]"
+                }
+            }
+        },         
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-03-01",
+            "name": "[concat(parameters('dmgrVMName'), '/createcluster')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "vmExtensionAddNodeLoop"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "settings": {
+                    "fileUris": [
+                        "[uri(variables('scriptLocation'), concat(variables('createCluster'), parameters('_artifactsLocationSasToken')))]"
+                    ],
+                    "commandToExecute": "[concat('sh ',variables('createCluster'), variables('commandToExecute1'), variables('commandToExecute2'))]"
+                }
+            }
+        }       
     ]
 }
