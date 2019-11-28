@@ -72,7 +72,7 @@ unzip "$imKitName" -d im_installer
     -installationDirectory /opt/IBM/WebSphere/ND/V9/ -sharedResourcesDirectory /opt/IBM/IMShared/ \
     -secureStorageFile storage_file -acceptLicense -showProgress
 
-if $dmgr; then
+if [ "$dmgr" = True ]; then
     echo members > dmgr.txt
 else 
     echo dmgrHostName > managed-node.txt
