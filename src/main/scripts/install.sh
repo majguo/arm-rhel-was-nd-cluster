@@ -1,5 +1,5 @@
 #!/bin/sh
-while getopts "l:u:p:m:c:d:a:" opt; do
+while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:a:" opt; do
     case $opt in
         l)
             imKitLocation=$OPTARG #SAS URI of the IBM Installation Manager install kit in Azure Storage
@@ -16,8 +16,29 @@ while getopts "l:u:p:m:c:d:a:" opt; do
         c)
             adminPassword=$OPTARG #Password for administrating WebSphere Admin Console
         ;;
-        d)
+        f)
             dmgr=$OPTARG #Flag indicating whether to install deployment manager
+        ;;
+        h)
+            dmgrHostName=$OPTARG #Host name of deployment manager server
+        ;;
+        r)
+            members=$OPTARG #Number of cluster members
+        ;;
+        n)
+            db2ServerName=$OPTARG #Host name/IP address of IBM DB2 Server
+        ;;
+        t)
+            db2ServerPortNumber=$OPTARG #Server port number of IBM DB2 Server
+        ;;
+        d)
+            db2DBName=$OPTARG #Database name of IBM DB2 Server
+        ;;
+        i)
+            db2DBUserName=$OPTARG #Database user name of IBM DB2 Server
+        ;;
+        s)
+            db2DBUserPwd=$OPTARG #Database user password of IBM DB2 Server
         ;;
         a)
             scriptLocation=$OPTARG #Script location ends in a trailing slash
@@ -52,7 +73,7 @@ unzip "$imKitName" -d im_installer
     -secureStorageFile storage_file -acceptLicense -showProgress
 
 if $dmgr; then
-    touch dmgr.txt
-else
-    touch nothing.txt
+    echo members > dmgr.txt
+else 
+    echo dmgrHostName > managed-node.txt
 fi
