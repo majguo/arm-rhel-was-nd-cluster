@@ -203,7 +203,7 @@ if [ "$dmgr" = True ]; then
     create_dmgr_profile Dmgr001 Dmgr001Node Dmgr001NodeCell "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Dmgr001 "$adminUserName" "$adminPassword"
     create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
-    systemctl start was_dmgr
+    /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
     create_data_source
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members
 else
