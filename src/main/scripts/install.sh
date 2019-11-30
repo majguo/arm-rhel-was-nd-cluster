@@ -39,7 +39,7 @@ create_systemd_service() {
     echo "Description=${srvDescription}" >> "$srvPath"
     echo "[Service]" >> "$srvPath"
     echo "Type=forking" >> "$srvPath"
-    echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${serverName}}" >> "$srvPath"
+    echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${serverName}" >> "$srvPath"
     echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh ${serverName}" >> "$srvPath"
     echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${serverName}/${serverName}.pid" >> "$srvPath"
     echo "SuccessExitStatus=143 0" >> "$srvPath"
@@ -208,5 +208,6 @@ if [ "$dmgr" = True ]; then
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
+    add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
 fi
