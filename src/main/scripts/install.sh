@@ -1,4 +1,129 @@
 #!/bin/sh
+
+create_dmgr_profile() {
+    profileName=$1
+    nodeName=$2
+    cellName=$3
+    adminUserName=$4
+    adminPassword=$5
+
+    /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName ${profileName} \
+        -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/management -serverType DEPLOYMENT_MANAGER \
+        -nodeName ${nodeName} -cellName ${cellName} -enableAdminSecurity true -adminUserName ${adminUserName} -adminPassword ${adminPassword}
+}
+
+add_admin_credentials_to_soap_client_props() {
+    profileName=$1
+    adminUserName=$2
+    adminPassword=$3
+    soapClientProps=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/properties/soap.client.props
+
+    # Add admin credentials
+    sed -i "s/com.ibm.SOAP.securityEnabled=false/com.ibm.SOAP.securityEnabled=true/g" "$soapClientProps"
+    sed -i "s/com.ibm.SOAP.loginUserid=/com.ibm.SOAP.loginUserid=${adminUserName}/g" "$soapClientProps"
+    sed -i "s/com.ibm.SOAP.loginPassword=/com.ibm.SOAP.loginPassword=${adminPassword}/g" "$soapClientProps"
+
+    # Encrypt com.ibm.SOAP.loginPassword
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
+}
+
+create_systemd_service() {
+    srvName=$1
+    srvDescription=$2
+    profileName=$3
+    serverName=$4
+    srvPath=/etc/systemd/system/${srvName}.service
+
+    # Add systemd unit file
+    echo "[Unit]" > "$srvPath"
+    echo "Description=${srvDescription}" >> "$srvPath"
+    echo "[Service]" >> "$srvPath"
+    echo "Type=forking" >> "$srvPath"
+    echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${serverName}}" >> "$srvPath"
+    echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh ${serverName}" >> "$srvPath"
+    echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${serverName}/${serverName}.pid" >> "$srvPath"
+    echo "SuccessExitStatus=143 0" >> "$srvPath"
+    echo "[Install]" >> "$srvPath"
+    echo "WantedBy=default.target" >> "$srvPath"
+    chmod a+x "$srvPath"
+
+    # Enable service
+    systemctl daemon-reload
+    systemctl enable "$srvName"
+}
+
+create_data_source() {
+    # # Configure JDBC provider and data soruce for IBM DB2 Server if required
+    # if [ ! -z "$db2ServerName" ] && [ ! -z "$db2ServerPortNumber" ] && [ ! -z "$db2DBName" ] && [ ! -z "$db2DBUserName" ] && [ ! -z "$db2DBUserPwd" ]; then
+    #     wget "$scriptLocation"create-ds.sh
+    #     chmod u+x create-ds.sh
+    #     ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
+    # fi
+}
+
+create_cluster() {
+    profileName=$1
+    dmgrNode=$2
+    cellName=$3
+    clusterName=$4
+    members=$5
+
+    nodes=( $(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.list('Node')" \
+        | grep -Po "(?<=\/nodes\/)[^|]*(?=|.*)" | grep -v $dmgrNode | sed 's/^/"/;s/$/"/') )
+    while [ ${#nodes[@]} -ne $members ]
+    do
+        sleep 5
+        echo "adding more nodes..."
+        nodes=( $(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.list('Node')" \
+            | grep -Po "(?<=\/nodes\/)[^|]*(?=|.*)" | grep -v $dmgrNode | sed 's/^/"/;s/$/"/') )
+    done
+    sleep 60
+    echo "all nodes are managed, creating cluster..."
+    nodes_string=$( IFS=,; echo "${nodes[*]}" )
+
+    sed -i.bak "s/\${CELL_NAME}/${cellName}/g" create-cluster.py
+    sed -i.bak "s/\${CLUSTER_NAME}/${clusterName}/g" create-cluster.py
+    sed -i.bak "s/\${NODES_STRING}/${nodes_string}/g" create-cluster.py
+
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-cluster.py
+    echo "cluster \"${clusterName}\" is successfully created!"
+}
+
+create_custom_profile() {
+    profileName=$1
+    dmgrHostName=$2
+    dmgrPort=$3
+    dmgrAdminUserName=$4
+    dmgrAdminPassword=$5
+    
+    curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
+    while [ $? -ne 0 ]
+    do
+        sleep 5
+        echo "dmgr is not ready"
+        curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
+    done
+    sleep 60
+    echo "dmgr is ready to add nodes"
+
+    output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
+        -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
+        -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
+    cnt=0
+    while echo $output | grep -qv "SUCCESS"
+    do
+        sleep 10
+        echo "adding node failed, retry it later..."
+        rm -rf /opt/IBM/WebSphere/ND/V9/profiles/$profileName
+        cnt=`expr $cnt + 1`
+        profileName=$5$cnt
+        output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
+            -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
+            -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
+    done
+    echo $output
+}
+
 while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:a:" opt; do
     case $opt in
         l)
@@ -46,15 +171,15 @@ while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:a:" opt; do
     esac
 done
 
-# Turn off firewall
-systemctl stop firewalld
-systemctl disable firewalld
-
 # Variables
 imKitName=agent.installer.linux.gtk.x86_64_1.9.0.20190715_0328.zip
 repositoryUrl=http://www.ibm.com/software/repositorymanager/com.ibm.websphere.ND.v90
 wasNDTraditional=com.ibm.websphere.ND.v90_9.0.5001.20190828_0616
 ibmJavaSDK=com.ibm.java.jdk.v8_8.0.5040.20190808_0919
+
+# Turn off firewall
+systemctl stop firewalld
+systemctl disable firewalld
 
 # Create installation directories
 mkdir -p /opt/IBM/InstallationManager/V1.9 && mkdir -p /opt/IBM/WebSphere/ND/V9 && mkdir -p /opt/IBM/IMShared
@@ -72,51 +197,15 @@ unzip "$imKitName" -d im_installer
     -installationDirectory /opt/IBM/WebSphere/ND/V9/ -sharedResourcesDirectory /opt/IBM/IMShared/ \
     -secureStorageFile storage_file -acceptLicense -showProgress
 
-# # Create standalone application profile
-# /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName AppSrv1 -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/default \
-#     -enableAdminSecurity true -adminUserName "$adminUserName" -adminPassword "$adminPassword"
-
-# # Add credentials to "soap.client.props" so they can be read by relative commands if required
-# soapClientProps=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/properties/soap.client.props
-# sed -i "s/com.ibm.SOAP.securityEnabled=false/com.ibm.SOAP.securityEnabled=true/g" "$soapClientProps"
-# sed -i "s/com.ibm.SOAP.loginUserid=/com.ibm.SOAP.loginUserid=${adminUserName}/g" "$soapClientProps"
-# sed -i "s/com.ibm.SOAP.loginPassword=/com.ibm.SOAP.loginPassword=${adminPassword}/g" "$soapClientProps"
-# # Encrypt com.ibm.SOAP.loginPassword
-# /opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
-
-# # Create and start server
-# /opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1
-
-# # Configure JDBC provider and data soruce for IBM DB2 Server if required
-# if [ ! -z "$db2ServerName" ] && [ ! -z "$db2ServerPortNumber" ] && [ ! -z "$db2DBName" ] && [ ! -z "$db2DBUserName" ] && [ ! -z "$db2DBUserPwd" ]; then
-#     wget "$scriptLocation"create-ds.sh
-#     chmod u+x create-ds.sh
-#     ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
-# fi
-
-# # Add systemd unit file for websphere.service
-# srvName=websphere
-# websphereSrv=/etc/systemd/system/${srvName}.service
-# echo "[Unit]" > "$websphereSrv"
-# echo "Description=IBM WebSphere Application Server" >> "$websphereSrv"
-# echo "[Service]" >> "$websphereSrv"
-# echo "Type=forking" >> "$websphereSrv"
-# echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1" >> "$websphereSrv"
-# echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1" >> "$websphereSrv"
-# echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/logs/server1/server1.pid" >> "$websphereSrv"
-# echo "SuccessExitStatus=143 0" >> "$websphereSrv"
-# echo "[Install]" >> "$websphereSrv"
-# echo "WantedBy=default.target" >> "$websphereSrv"
-# chmod a+x "$websphereSrv"
-
-# # Enable and start websphere service
-# /opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1
-# systemctl daemon-reload
-# systemctl enable "$srvName"
-# systemctl start "$srvName"
-
+# Create cluster by creating deployment manager, node agent & add nodes to be managed
 if [ "$dmgr" = True ]; then
-    echo $members > dmgr.txt
-else 
-    echo $dmgrHostName > managed-node.txt
+    create_dmgr_profile Dmgr001 Dmgr001Node Dmgr001NodeCell "$adminUserName" "$adminPassword"
+    add_admin_credentials_to_soap_client_props Dmgr001 "$adminUserName" "$adminPassword"
+    create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
+    systemctl start websphere_dmgr
+    create_data_source
+    create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members
+else
+    create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
+    create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
 fi
