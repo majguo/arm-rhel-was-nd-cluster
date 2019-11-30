@@ -110,14 +110,14 @@ create_custom_profile() {
     output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
         -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
         -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
-    cnt=0
+    #cnt=0
     while echo $output | grep -qv "SUCCESS"
     do
         sleep 10
         echo "adding node failed, retry it later..."
         rm -rf /opt/IBM/WebSphere/ND/V9/profiles/$profileName
-        cnt=`expr $cnt + 1`
-        profileName=$5$cnt
+        #cnt=`expr $cnt + 1`
+        #profileName=$1$cnt
         output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
             -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
             -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
