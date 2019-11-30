@@ -72,48 +72,48 @@ unzip "$imKitName" -d im_installer
     -installationDirectory /opt/IBM/WebSphere/ND/V9/ -sharedResourcesDirectory /opt/IBM/IMShared/ \
     -secureStorageFile storage_file -acceptLicense -showProgress
 
-# Create standalone application profile
-/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName AppSrv1 -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/default \
-    -enableAdminSecurity true -adminUserName "$adminUserName" -adminPassword "$adminPassword"
+# # Create standalone application profile
+# /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName AppSrv1 -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/default \
+#     -enableAdminSecurity true -adminUserName "$adminUserName" -adminPassword "$adminPassword"
 
-# Add credentials to "soap.client.props" so they can be read by relative commands if required
-soapClientProps=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/properties/soap.client.props
-sed -i "s/com.ibm.SOAP.securityEnabled=false/com.ibm.SOAP.securityEnabled=true/g" "$soapClientProps"
-sed -i "s/com.ibm.SOAP.loginUserid=/com.ibm.SOAP.loginUserid=${adminUserName}/g" "$soapClientProps"
-sed -i "s/com.ibm.SOAP.loginPassword=/com.ibm.SOAP.loginPassword=${adminPassword}/g" "$soapClientProps"
-# Encrypt com.ibm.SOAP.loginPassword
-/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
+# # Add credentials to "soap.client.props" so they can be read by relative commands if required
+# soapClientProps=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/properties/soap.client.props
+# sed -i "s/com.ibm.SOAP.securityEnabled=false/com.ibm.SOAP.securityEnabled=true/g" "$soapClientProps"
+# sed -i "s/com.ibm.SOAP.loginUserid=/com.ibm.SOAP.loginUserid=${adminUserName}/g" "$soapClientProps"
+# sed -i "s/com.ibm.SOAP.loginPassword=/com.ibm.SOAP.loginPassword=${adminPassword}/g" "$soapClientProps"
+# # Encrypt com.ibm.SOAP.loginPassword
+# /opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
 
-# Create and start server
-/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1
+# # Create and start server
+# /opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1
 
-# Configure JDBC provider and data soruce for IBM DB2 Server if required
-if [ ! -z "$db2ServerName" ] && [ ! -z "$db2ServerPortNumber" ] && [ ! -z "$db2DBName" ] && [ ! -z "$db2DBUserName" ] && [ ! -z "$db2DBUserPwd" ]; then
-    wget "$scriptLocation"create-ds.sh
-    chmod u+x create-ds.sh
-    ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
-fi
+# # Configure JDBC provider and data soruce for IBM DB2 Server if required
+# if [ ! -z "$db2ServerName" ] && [ ! -z "$db2ServerPortNumber" ] && [ ! -z "$db2DBName" ] && [ ! -z "$db2DBUserName" ] && [ ! -z "$db2DBUserPwd" ]; then
+#     wget "$scriptLocation"create-ds.sh
+#     chmod u+x create-ds.sh
+#     ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
+# fi
 
-# Add systemd unit file for websphere.service
-srvName=websphere
-websphereSrv=/etc/systemd/system/${srvName}.service
-echo "[Unit]" > "$websphereSrv"
-echo "Description=IBM WebSphere Application Server" >> "$websphereSrv"
-echo "[Service]" >> "$websphereSrv"
-echo "Type=forking" >> "$websphereSrv"
-echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1" >> "$websphereSrv"
-echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1" >> "$websphereSrv"
-echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/logs/server1/server1.pid" >> "$websphereSrv"
-echo "SuccessExitStatus=143 0" >> "$websphereSrv"
-echo "[Install]" >> "$websphereSrv"
-echo "WantedBy=default.target" >> "$websphereSrv"
-chmod a+x "$websphereSrv"
+# # Add systemd unit file for websphere.service
+# srvName=websphere
+# websphereSrv=/etc/systemd/system/${srvName}.service
+# echo "[Unit]" > "$websphereSrv"
+# echo "Description=IBM WebSphere Application Server" >> "$websphereSrv"
+# echo "[Service]" >> "$websphereSrv"
+# echo "Type=forking" >> "$websphereSrv"
+# echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/startServer.sh server1" >> "$websphereSrv"
+# echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1" >> "$websphereSrv"
+# echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/logs/server1/server1.pid" >> "$websphereSrv"
+# echo "SuccessExitStatus=143 0" >> "$websphereSrv"
+# echo "[Install]" >> "$websphereSrv"
+# echo "WantedBy=default.target" >> "$websphereSrv"
+# chmod a+x "$websphereSrv"
 
-# Enable and start websphere service
-/opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1
-systemctl daemon-reload
-systemctl enable "$srvName"
-systemctl start "$srvName"
+# # Enable and start websphere service
+# /opt/IBM/WebSphere/ND/V9/profiles/AppSrv1/bin/stopServer.sh server1
+# systemctl daemon-reload
+# systemctl enable "$srvName"
+# systemctl start "$srvName"
 
 if [ "$dmgr" = True ]; then
     echo $members > dmgr.txt
