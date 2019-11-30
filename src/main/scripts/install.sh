@@ -59,6 +59,7 @@ create_data_source() {
     #     chmod u+x create-ds.sh
     #     ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
     # fi
+    echo "TODO: create data source"
 }
 
 create_cluster() {
