@@ -59,7 +59,7 @@ create_data_source() {
     #     chmod u+x create-ds.sh
     #     ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
     # fi
-    echo "TODO: create data source"
+    echo "TODO: create DB2 JDBC provider & data source connection"
 }
 
 create_cluster() {
@@ -110,14 +110,11 @@ create_custom_profile() {
     output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
         -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
         -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
-    #cnt=0
     while echo $output | grep -qv "SUCCESS"
     do
         sleep 10
         echo "adding node failed, retry it later..."
         rm -rf /opt/IBM/WebSphere/ND/V9/profiles/$profileName
-        #cnt=`expr $cnt + 1`
-        #profileName=$1$cnt
         output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
             -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
             -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
@@ -204,8 +201,9 @@ if [ "$dmgr" = True ]; then
     add_admin_credentials_to_soap_client_props Dmgr001 "$adminUserName" "$adminPassword"
     create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
-    create_data_source
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members
+    # TODO: create DB2 JDBC provider and data source connection
+    create_data_source
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
