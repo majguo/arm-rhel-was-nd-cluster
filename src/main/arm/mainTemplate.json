@@ -226,7 +226,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings":{
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')), copyIndex())]"
+                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')), if(equals(copyIndex(), 0), '', concat('-mn', copyIndex())))]"
                 }
             }
         },
