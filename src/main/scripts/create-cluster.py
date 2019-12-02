@@ -6,7 +6,7 @@ cluster = AdminConfig.create('ServerCluster', s1, '[[name ${CLUSTER_NAME}]]')
 nodes = [${NODES_STRING}]
 for node in nodes:
   id = AdminConfig.getid('/Node:%s/' % node)
-  AdminConfig.createClusterMember(cluster, id, [['memberName', node]])
+  AdminConfig.createClusterMember(cluster, id, [['memberName', 'server_%s' % node]])
 AdminConfig.save()
 AdminNodeManagement.syncActiveNodes()
 
