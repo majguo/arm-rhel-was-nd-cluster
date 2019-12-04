@@ -328,7 +328,7 @@
                         "[uri(variables('scriptLocation'), concat('create-cluster.py', parameters('_artifactsLocationSasToken')))]",
                         "[uri(variables('scriptLocation'), concat('create-ds.py', parameters('_artifactsLocationSasToken')))]"
                     ],
-                    "commandToExecute": "[concat('sh ','install.sh', variables('arguments1'), variables('arguments2'), ' -f ', equals(copyIndex(), 0))]"
+                    "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('arguments1'), variables('arguments2'))]"
                 }
             }
         }     
