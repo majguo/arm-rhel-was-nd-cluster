@@ -1,7 +1,7 @@
 # Reference: https://raw.githubusercontent.com/keensoft/was-db2-docker/master/was/assets/create-datasource.jython
 
-# Get WAS server id as the parent ID for creating JDBC provider
-server = AdminConfig.getid('/Server:${WAS_SERVER_NAME}/')
+# Get WAS cluster id as the parent ID for creating JDBC provider
+cluster = AdminConfig.getid('/ServerCluster:${CLUSTER_NAME}/')
 
 # JDBC Provider
 n1 = ['name', 'DB2JDBCProvider']
@@ -10,10 +10,10 @@ cls = ['classpath', '${DB2UNIVERSAL_JDBC_DRIVER_PATH}/db2jcc.jar;${DB2UNIVERSAL_
 provider = ['providerType', 'DB2 Universal JDBC Driver Provider (XA)']
 xa = ['xa', 'true']
 jdbcAttrs = [n1,  implCN, cls, provider, xa]
-jdbCProvider = AdminConfig.create('JDBCProvider', server, jdbcAttrs)
+jdbCProvider = AdminConfig.create('JDBCProvider', cluster, jdbcAttrs)
 
 # JASS Auth entry
-userAlias = 'wasnd/db2'
+userAlias = 'wasnd-cluster/db2'
 alias = ['alias', userAlias]
 userid = ['userId', '${DB2_DATABASE_USER_NAME}']
 password = ['password', '${DB2_DATABASE_USER_PASSWORD}']
@@ -38,5 +38,7 @@ AdminConfig.create('J2EEResourceProperty', propSet, [["name", "databaseName"], [
 AdminConfig.create('J2EEResourceProperty', propSet, [["name", "serverName"], ["value", "${DB2_SERVER_NAME}"]])
 AdminConfig.create('J2EEResourceProperty', propSet, [["name", "portNumber"], ["value", "${PORT_NUMBER}"]])
 
-# Save configuratoin changes
+# Save configuratoin changes and restart node agents
 AdminConfig.save()
+AdminNodeManagement.syncActiveNodes()
+AdminNodeManagement.restartActiveNodes()

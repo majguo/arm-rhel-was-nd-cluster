@@ -52,16 +52,6 @@ create_systemd_service() {
     systemctl enable "$srvName"
 }
 
-create_data_source() {
-    # # Configure JDBC provider and data soruce for IBM DB2 Server if required
-    # if [ ! -z "$db2ServerName" ] && [ ! -z "$db2ServerPortNumber" ] && [ ! -z "$db2DBName" ] && [ ! -z "$db2DBUserName" ] && [ ! -z "$db2DBUserPwd" ]; then
-    #     wget "$scriptLocation"create-ds.sh
-    #     chmod u+x create-ds.sh
-    #     ./create-ds.sh /opt/IBM/WebSphere/ND/V9 AppSrv1 server1 "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$scriptLocation"
-    # fi
-    echo "TODO: create DB2 JDBC provider & data source connection"
-}
-
 create_cluster() {
     profileName=$1
     dmgrNode=$2
@@ -88,6 +78,33 @@ create_cluster() {
 
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-cluster.py
     echo "cluster \"${clusterName}\" is successfully created!"
+}
+
+create_data_source() {
+    profileName=$1
+    clusterName=$2
+    db2ServerName=$3
+    db2ServerPortNumber=$4
+    db2DBName=$5
+    db2DBUserName=$6
+    db2DBUserPwd=$7
+    jdbcDriverPath=/opt/IBM/WebSphere/ND/V9/db2/java
+
+    if [ -z "$db2ServerName" ] || [ -z "$db2ServerPortNumber" ] || [ -z "$db2DBName" ] || [ -z "$db2DBUserName" ] || [ -z "$db2DBUserPwd" ]; then
+        exit 0
+    fi
+
+    # Get jython file template & replace placeholder strings with user-input parameters
+    sed -i.bak "s/\${CLUSTER_NAME}/${clusterName}/g" create-ds.py
+    sed -i.bak "s#\${DB2UNIVERSAL_JDBC_DRIVER_PATH}#${jdbcDriverPath}#g" create-ds.py
+    sed -i.bak "s/\${DB2_DATABASE_USER_NAME}/${db2DBUserName}/g" create-ds.py
+    sed -i.bak "s/\${DB2_DATABASE_USER_PASSWORD}/${db2DBUserPwd}/g" create-ds.py
+    sed -i.bak "s/\${DB2_DATABASE_NAME}/${db2DBName}/g" create-ds.py
+    sed -i.bak "s/\${DB2_SERVER_NAME}/${db2ServerName}/g" create-ds.py
+    sed -i.bak "s/\${PORT_NUMBER}/${db2ServerPortNumber}/g" create-ds.py
+
+    # Create JDBC provider and data source using jython file
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-ds.py
 }
 
 create_custom_profile() {
@@ -120,6 +137,14 @@ create_custom_profile() {
             -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
     done
     echo $output
+}
+
+copy_db2_drivers() {
+    wasRootPath=/opt/IBM/WebSphere/ND/V9
+    jdbcDriverPath="$wasRootPath"/db2/java
+
+    mkdir -p "$jdbcDriverPath"
+    find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
 while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:a:" opt; do
@@ -202,10 +227,10 @@ if [ "$dmgr" = True ]; then
     create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members
-    # TODO: create DB2 JDBC provider and data source connection
-    create_data_source
+    create_data_source Dmgr001 MyCluster "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd"
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
+    copy_db2_drivers
 fi
