@@ -72,9 +72,10 @@ create_cluster() {
     echo "all nodes are managed, creating cluster..."
     nodes_string=$( IFS=,; echo "${nodes[*]}" )
 
-    sed -i.bak "s/\${CELL_NAME}/${cellName}/g" create-cluster.py
-    sed -i.bak "s/\${CLUSTER_NAME}/${clusterName}/g" create-cluster.py
-    sed -i.bak "s/\${NODES_STRING}/${nodes_string}/g" create-cluster.py
+    cp create-cluster.py create-cluster.py.bak
+    sed -i "s/\${CELL_NAME}/${cellName}/g" create-cluster.py
+    sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-cluster.py
+    sed -i "s/\${NODES_STRING}/${nodes_string}/g" create-cluster.py
 
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-cluster.py
     echo "cluster \"${clusterName}\" is successfully created!"
@@ -91,20 +92,23 @@ create_data_source() {
     jdbcDriverPath=/opt/IBM/WebSphere/ND/V9/db2/java
 
     if [ -z "$db2ServerName" ] || [ -z "$db2ServerPortNumber" ] || [ -z "$db2DBName" ] || [ -z "$db2DBUserName" ] || [ -z "$db2DBUserPwd" ]; then
+        echo "quit due to DB2 connectoin info is not provided"
         exit 0
     fi
 
     # Get jython file template & replace placeholder strings with user-input parameters
-    sed -i.bak "s/\${CLUSTER_NAME}/${clusterName}/g" create-ds.py
-    sed -i.bak "s#\${DB2UNIVERSAL_JDBC_DRIVER_PATH}#${jdbcDriverPath}#g" create-ds.py
-    sed -i.bak "s/\${DB2_DATABASE_USER_NAME}/${db2DBUserName}/g" create-ds.py
-    sed -i.bak "s/\${DB2_DATABASE_USER_PASSWORD}/${db2DBUserPwd}/g" create-ds.py
-    sed -i.bak "s/\${DB2_DATABASE_NAME}/${db2DBName}/g" create-ds.py
-    sed -i.bak "s/\${DB2_SERVER_NAME}/${db2ServerName}/g" create-ds.py
-    sed -i.bak "s/\${PORT_NUMBER}/${db2ServerPortNumber}/g" create-ds.py
+    cp create-ds.py create-ds.py.bak
+    sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-ds.py
+    sed -i "s#\${DB2UNIVERSAL_JDBC_DRIVER_PATH}#${jdbcDriverPath}#g" create-ds.py
+    sed -i "s/\${DB2_DATABASE_USER_NAME}/${db2DBUserName}/g" create-ds.py
+    sed -i "s/\${DB2_DATABASE_USER_PASSWORD}/${db2DBUserPwd}/g" create-ds.py
+    sed -i "s/\${DB2_DATABASE_NAME}/${db2DBName}/g" create-ds.py
+    sed -i "s/\${DB2_SERVER_NAME}/${db2ServerName}/g" create-ds.py
+    sed -i "s/\${PORT_NUMBER}/${db2ServerPortNumber}/g" create-ds.py
 
     # Create JDBC provider and data source using jython file
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-ds.py
+    echo "DB2 JDBC provider and data source are successfully created!"
 }
 
 create_custom_profile() {
