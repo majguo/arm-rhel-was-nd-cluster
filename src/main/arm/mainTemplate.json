@@ -40,7 +40,7 @@
             "type": "string"
         },
         "dnsLabelPrefix":{
-            "defaultValue": "wasnd-vm",
+            "defaultValue": "wasndcluster",
             "type": "string"
         },
 		"numberOfNodes": {
