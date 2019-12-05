@@ -214,7 +214,7 @@ mkdir -p /opt/IBM/InstallationManager/V1.9 && mkdir -p /opt/IBM/WebSphere/ND/V9 
 # Install IBM Installation Manager
 wget -O "$imKitName" "$imKitLocation"
 mkdir im_installer
-unzip "$imKitName" -d im_installer
+unzip -q "$imKitName" -d im_installer
 ./im_installer/userinstc -log log_file -acceptLicense -installationDirectory /opt/IBM/InstallationManager/V1.9
 
 # Install IBM WebSphere Application Server Network Deployment V9 using IBM Instalation Manager
