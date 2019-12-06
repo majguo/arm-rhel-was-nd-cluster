@@ -93,7 +93,7 @@
 
 #### Logos
 
-- [marketing-artifacts](https://github.com/majguo/arm-rhel-was-nd/tree/master/src/main/resources/marketing-artifacts)
+- [marketing-artifacts](https://github.com/majguo/arm-rhel-was-nd-cluster/tree/master/src/main/resources/marketing-artifacts)
 
 #### Screenshots
 
