@@ -2,7 +2,7 @@
 
 - Content that required to create an Azure applicatoin offer
 - See [Azure applicatoin offer](https://docs.microsoft.com/en-us/azure/marketplace/cloud-partner-portal/azure-applications/cpp-azure-app-offer) for details
-- When submitting the offer, use content from [this directory](https://github.com/majguo/arm-rhel-was-nd/tree/master/src/main/resources) (To-Be-Changed), but apply the changes in this file on top
+- When submitting the offer, use content from [this directory](https://github.com/majguo/arm-rhel-was-nd-cluster/tree/master/src/main/resources) (To-Be-Changed), but apply the changes in this file on top
 
 ## Offer Settings
 
