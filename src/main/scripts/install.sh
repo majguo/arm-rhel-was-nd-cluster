@@ -151,7 +151,7 @@ copy_db2_drivers() {
     find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
-while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:a:" opt; do
+while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:" opt; do
     case $opt in
         l)
             imKitLocation=$OPTARG #SAS URI of the IBM Installation Manager install kit in Azure Storage
@@ -191,9 +191,6 @@ while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:a:" opt; do
         ;;
         s)
             db2DBUserPwd=$OPTARG #Database user password of IBM DB2 Server
-        ;;
-        a)
-            scriptLocation=$OPTARG #Script location ends in a trailing slash
         ;;
     esac
 done
