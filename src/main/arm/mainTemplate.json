@@ -98,15 +98,25 @@
             "defaultValue": false,
             "type": "bool"
         },
-        "db2ConnConfig": {
-            "defaultValue": {
-                "serverName": "[newGuid()]",
-                "portNumber": "[newGuid()]",
-                "dBName": "[newGuid()]",
-                "dBUserName": "[newGuid()]",
-                "dBUserPwd": "[newGuid()]"
-            },
-            "type": "secureObject"
+        "db2ServerName": {
+           "defaultValue": "[newGuid()]",
+            "type": "string"
+        },
+        "db2ServerPortNumber": {
+            "defaultValue": "[newGuid()]",
+            "type": "string"
+        },
+        "db2DBName": {
+            "defaultValue": "[newGuid()]",
+            "type": "string"
+        },
+        "db2DBUserName": {
+            "defaultValue": "[newGuid()]",
+            "type": "string"
+        },
+        "db2DBUserPwd": {
+            "defaultValue": "[newGuid()]",
+            "type": "securestring"
         }
     },
     "variables": {
@@ -115,7 +125,7 @@
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "arguments1": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',parameters('dmgrVMName'),' -r ',sub(parameters('numberOfNodes'),1))]",
-        "arguments2": "[if(parameters('connectToDB2Server'),concat(' -n \"',parameters('db2ConnConfig').serverName,'\" -t ',parameters('db2ConnConfig').portNumber,' -d ',parameters('db2ConnConfig').dBName,' -i ',parameters('db2ConnConfig').dBUserName,' -s ',parameters('db2ConnConfig').dBUserPwd),' -n  -t  -d  -i  -s ')]"
+        "arguments2": "[if(parameters('connectToDB2Server'),concat(' -n \"',parameters('db2ServerName'),'\" -t ',parameters('db2ServerPortNumber'),' -d ',parameters('db2DBName'),' -i ',parameters('db2DBUserName'),' -s ',parameters('db2DBUserPwd')),' -n  -t  -d  -i  -s ')]"
     },
     "resources": [
         { 
