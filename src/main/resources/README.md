@@ -11,7 +11,7 @@
 - Publisher ID
   - ???
 - Name
-  - IBM WebSphere Server ND Traditional V9.0.5.1 Cluster
+  - IBM WebSphere Server ND Traditional V9.0.5 Cluster
 
 ## SKUs
 - SKU ID
@@ -20,7 +20,7 @@
 ### SKU Details
 
 - Title
-  - IBM WebSphere Server ND Traditional V9.0.5.1 Cluster
+  - IBM WebSphere Server ND Traditional V9.0.5 Cluster
 - Summary
   - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5.1 Cluster
 - Description
