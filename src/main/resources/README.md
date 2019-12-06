@@ -22,9 +22,9 @@
 - Title
   - IBM WebSphere Server ND Traditional V9.0.5 Cluster
 - Summary
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5.1 Cluster
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Description
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5.1 Cluster on RedHat Enterprise Linux 7.4
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4
 - SKU Type
   - Solution template
 - Cloud Availability
@@ -60,13 +60,13 @@
 ### Overview
 
 - Title
-  - IBM WebSphere Server ND Traditional V9.0.5.1 Cluster
+  - IBM WebSphere Server ND Traditional V9.0.5 Cluster
 - Summary
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5.1 Cluster
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Long Summary
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5.1 Cluster on RedHat Enterprise Linux 7.4
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4
 - Description
-  - IBM WebSphere Application Server Network Deployment provides a flexible, secure server runtime environment for large-scale and mission critical application deployments. This offer provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5.1 Cluster on RedHat Enterprise Linux 7.4. ???
+  - IBM WebSphere Application Server Network Deployment provides a flexible, secure server runtime environment for large-scale and mission critical application deployments. This offer provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4. ???
 - Offer available to Microsoft CSP Reseller channel?
   - No
 - Marketing identifier 
