@@ -279,7 +279,7 @@
             "adminUser": "[steps('Prerequisites').Credentials.wasAdminUsername]",
             "adminPwd": "[steps('Prerequisites').Credentials.wasAdminPassword]",
             "installKitUri": "[steps('Prerequisites').IBMInstallKit.uri]",
-            "connectToDB2Server": "[steps('DB2ServerConnectionConfig').connectToDB2Server]",
+            "connectToDB2Server": "[bool(steps('DB2ServerConnectionConfig').connectToDB2Server)]",
             "db2ConnConfig": {
                 "serverName": "[steps('DB2ServerConnectionConfig').connectionInfo.db2ServerName]",
                 "portNumber": "[steps('DB2ServerConnectionConfig').connectionInfo.db2ServerPortNumber]",

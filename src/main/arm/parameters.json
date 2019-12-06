@@ -32,6 +32,9 @@
         "managedNodeVMPrefix": {
             "value": "${managedNodeVMPrefix}"
         },
+        "numberOfNodes": {
+            "value": "${numberOfNodes}"
+        },
         "virtualNetworkName": {
             "value": "${virtualNetworkName}"
         },
