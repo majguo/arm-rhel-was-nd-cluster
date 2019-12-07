@@ -36,8 +36,8 @@
                 "defaultValue": "mn",
                 "constraints": {
                     "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,20}$",
-                    "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
+                    "regex": "^[a-z0-9A-Z]{2,20}$",
+                    "validationMessage": "The prefix must be between 2 and 20 characters long and contain letters, numbers only."
                 }
             },
             {
