@@ -52,24 +52,20 @@
 				"description": "Number of nodes in the cluster to deploy, limit 5"
 			}
 		},
-		"dmgrVMName": {
+		"dmgrVMPrefix": {
 			"type": "string",
-			"defaultValue": "dmgrVM",
+			"defaultValue": "dmgr",
 			"metadata": {
-				"description": "virtual machine / host name of Deployment Manager server"
+				"description": "virtual machine / host name prefix of Deployment Manager server"
 			}
         },
-        "managedNodeVMPrefix": {
+        "managedVMPrefix": {
 			"type": "string",
-			"defaultValue": "mnVM",
+			"defaultValue": "mn",
 			"metadata": {
 				"description": "virtual machine / host name prefix of Managed Node server"
 			}
 		},
-        "virtualNetworkName": {
-            "defaultValue": "wasnd-cluster-vnet",
-            "type": "string"
-        },
         "addressPrefix": {
             "defaultValue": "10.0.0.0/16",
             "type": "string"
@@ -80,14 +76,6 @@
         },
         "subnetAddressPrefix": {
             "defaultValue": "10.0.1.0/24",
-            "type": "string"
-        },
-        "virtualNetworkExisted": {
-            "defaultValue": false,
-            "type": "bool"
-        },
-        "networkSecurityGroupName": {
-            "defaultValue": "wasnd-cluster-nsg",
             "type": "string"
         },
         "location":{
@@ -120,11 +108,15 @@
         }
     },
     "variables": {
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
-        "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
-        "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "dmgrVMName": "[concat(parameters('dmgrVMPrefix'), 'VM')]",
+        "managedVMPrefix": "[concat(parameters('managedVMPrefix'), 'VM')]",
+        "virtualNetworkName": "[concat(parameters('dnsLabelPrefix'), '-vnet')]",
+        "networkSecurityGroupName": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), parameters('subnetName'))]",
+        "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
-        "arguments1": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',parameters('dmgrVMName'),' -r ',sub(parameters('numberOfNodes'),1))]",
+        "arguments1": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('dmgrVMName'),' -r ',sub(parameters('numberOfNodes'),1))]",
         "arguments2": "[if(parameters('connectToDB2Server'),concat(' -n \"',parameters('db2ServerName'),'\" -t ',parameters('db2ServerPortNumber'),' -d ',parameters('db2DBName'),' -i ',parameters('db2DBUserName'),' -s ',parameters('db2DBUserPwd')),' -n  -t  -d  -i  -s ')]"
     },
     "resources": [
@@ -144,7 +136,7 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-06-01",
-            "name": "[parameters('networkSecurityGroupName')]",
+            "name": "[variables('networkSecurityGroupName')]",
             "location": "[parameters('location')]",
             "properties": {
                 "securityRules": [
@@ -193,8 +185,7 @@
         {
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-06-01",
-            "name": "[parameters('virtualNetworkName')]",
-            "condition": "[not(parameters('virtualNetworkExisted'))]",
+            "name": "[variables('virtualNetworkName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[variables('networkSecurityGroupRef')]"
@@ -212,7 +203,7 @@
         {
             "type": "Microsoft.Network/virtualNetworks/subnets",
             "apiVersion": "2019-06-01",
-            "name": "[concat(parameters('virtualNetworkName'), '/', parameters('subnetName'))]",
+            "name": "[concat(variables('virtualNetworkName'), '/', parameters('subnetName'))]",
             "dependsOn": [
                 "[variables('virtualNetworkRef')]",
                 "[variables('networkSecurityGroupRef')]"
@@ -227,7 +218,7 @@
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-06-01",
-            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-ip')]",
+            "name": "[concat(if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex())), '-ip')]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "publicIPLoop",
@@ -243,7 +234,7 @@
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-06-01",
-            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-if')]",
+            "name": "[concat(if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex())), '-if')]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "nicLoop",
@@ -260,7 +251,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-ip'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex())), '-ip'))]"
                             },
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
@@ -273,7 +264,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-03-01",
-            "name": "[if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex()))]",
+            "name": "[if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex()))]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "virtualMachineLoop",
@@ -294,7 +285,7 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-disk')]",
+                        "name": "[concat(if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex())), '-disk')]",
                         "createOption": "FromImage",
                         "managedDisk": {
                             "storageAccountType": "[parameters('osDiskType')]"
@@ -302,14 +293,14 @@
                     }
                 },
                 "osProfile": {
-                    "computerName": "[if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex()))]",
+                    "computerName": "[if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex()))]",
                     "adminUsername": "[parameters('vmAdminId')]",
                     "adminPassword": "[parameters('vmAdminPwd')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '-if'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex())), '-if'))]"
                         }
                     ]
                 }
@@ -318,7 +309,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-03-01",
-            "name": "[concat(if(equals(copyIndex(), 0), parameters('dmgrVMName'), concat(parameters('managedNodeVMPrefix'), copyIndex())), '/install')]",
+            "name": "[concat(if(equals(copyIndex(), 0), variables('dmgrVMName'), concat(variables('managedVMPrefix'), copyIndex())), '/install')]",
             "location": "[parameters('location')]",
             "copy": {
 				"name": "virtualMachineExtensionLoop",

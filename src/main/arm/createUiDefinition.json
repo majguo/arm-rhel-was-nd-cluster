@@ -5,18 +5,6 @@
     "parameters": {
         "basics": [
             {
-                "name": "dnsLabelPrefix",
-                "type": "Microsoft.Common.TextBox",
-                "label": "DNS Label Prefix",
-                "toolTip": "The string to prepend to the DNS label.",
-                "defaultValue": "wasndcluster",
-                "constraints": {
-                    "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,79}$",
-                    "validationMessage": "The prefix must be between 3 and 79 characters long and contain letters, numbers only."
-                }
-            },
-            {
                 "name": "numberOfNodes",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Number of VMs",
@@ -26,6 +14,42 @@
                     "required": true,
                     "regex": "^(2|3|4|5)$",
                     "validationMessage": "Number of VMs to deploy, limit 5."
+                }
+            },
+            {
+                "name": "dmgrVMPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Deployment Manager Server Prefix",
+                "toolTip": "The string to prepend to the name of the deployment manager server.",
+                "defaultValue": "dmgr",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z]{3,20}$",
+                    "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
+                }
+            },
+            {
+                "name": "managedVMPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Managed Server Prefix",
+                "toolTip": "The string to prepend to the name of the managed server.",
+                "defaultValue": "mn",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z]{3,20}$",
+                    "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
+                }
+            },
+            {
+                "name": "dnsLabelPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "DNS Label Prefix",
+                "toolTip": "The string to prepend to the DNS label.",
+                "defaultValue": "wasndcluster",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z]{3,30}$",
+                    "validationMessage": "The prefix must be between 3 and 30 characters long and contain letters, numbers only."
                 }
             }
         ],
@@ -269,8 +293,10 @@
         ],
         "outputs": {
             "location": "[location()]",
-            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
             "numberOfNodes": "[int(basics('numberOfNodes'))]",
+            "dmgrVMPrefix": "[basics('dmgrVMPrefix')]",
+            "managedVMPrefix": "[basics('managedVMPrefix')]",
+            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
             "vmSize": "[steps('VirtualMachineConfig').vmSizeSelect]",
             "ibmUserId": "[steps('Prerequisites').Credentials.IBMidUsername]",
             "ibmUserPwd": "[steps('Prerequisites').Credentials.IBMidPassword]",

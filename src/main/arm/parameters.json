@@ -26,17 +26,14 @@
         "dnsLabelPrefix":{
             "value": "${dnsLabelPrefix}"
         },
-        "dmgrVMName": {
-            "value": "${dmgrVMName}"
+        "dmgrVMPrefix": {
+            "value": "${dmgrVMPrefix}"
         },
-        "managedNodeVMPrefix": {
-            "value": "${managedNodeVMPrefix}"
+        "managedVMPrefix": {
+            "value": "${managedVMPrefix}"
         },
         "numberOfNodes": {
             "value": "${numberOfNodes}"
-        },
-        "virtualNetworkName": {
-            "value": "${virtualNetworkName}"
         },
         "addressPrefix": {
             "value": "${addressPrefix}"
