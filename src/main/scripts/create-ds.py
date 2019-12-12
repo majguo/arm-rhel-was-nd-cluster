@@ -24,7 +24,7 @@ j2cUser = AdminConfig.create('JAASAuthData', security, jaasAttrs)
 # Data Source
 newjdbc = AdminConfig.getid('/JDBCProvider:DB2JDBCProvider/')
 name = ['name', 'DB2DataSource']
-jndi = ['jndiName', 'DB2DataSource']
+jndi = ['jndiName', '${DB2_DATASOURCE_JNDI_NAME}']
 auth = ['authDataAlias' , userAlias]
 authMechanism = ['authMechanismPreference' , 'BASIC_PASSWORD']
 helper = ['datasourceHelperClassname', 'com.ibm.websphere.rsadapter.DB2UniversalDataStoreHelper']

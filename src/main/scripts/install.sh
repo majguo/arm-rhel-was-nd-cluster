@@ -89,6 +89,7 @@ create_data_source() {
     db2DBName=$5
     db2DBUserName=$6
     db2DBUserPwd=$7
+    db2DSJndiName=${8:-jdbc/Sample}
     jdbcDriverPath=/opt/IBM/WebSphere/ND/V9/db2/java
 
     if [ -z "$db2ServerName" ] || [ -z "$db2ServerPortNumber" ] || [ -z "$db2DBName" ] || [ -z "$db2DBUserName" ] || [ -z "$db2DBUserPwd" ]; then
@@ -103,6 +104,7 @@ create_data_source() {
     sed -i "s/\${DB2_DATABASE_USER_NAME}/${db2DBUserName}/g" create-ds.py
     sed -i "s/\${DB2_DATABASE_USER_PASSWORD}/${db2DBUserPwd}/g" create-ds.py
     sed -i "s/\${DB2_DATABASE_NAME}/${db2DBName}/g" create-ds.py
+    sed -i "s/\${DB2_DATASOURCE_JNDI_NAME}/${db2DSJndiName}/g" create-ds.py
     sed -i "s/\${DB2_SERVER_NAME}/${db2ServerName}/g" create-ds.py
     sed -i "s/\${PORT_NUMBER}/${db2ServerPortNumber}/g" create-ds.py
 
@@ -151,7 +153,7 @@ copy_db2_drivers() {
     find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
-while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:" opt; do
+while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:j:" opt; do
     case $opt in
         l)
             imKitLocation=$OPTARG #SAS URI of the IBM Installation Manager install kit in Azure Storage
@@ -192,6 +194,9 @@ while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:" opt; do
         s)
             db2DBUserPwd=$OPTARG #Database user password of IBM DB2 Server
         ;;
+        j)
+            db2DSJndiName=$OPTARG #Datasource JNDI name
+        ;;
     esac
 done
 
@@ -228,7 +233,7 @@ if [ "$dmgr" = True ]; then
     create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members
-    create_data_source Dmgr001 MyCluster "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd"
+    create_data_source Dmgr001 MyCluster "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$db2DSJndiName"
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"

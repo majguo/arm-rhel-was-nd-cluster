@@ -258,7 +258,7 @@
                             {
                                 "name": "db2DBName",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Databae name",
+                                "label": "Database name",
                                 "toolTip": "The database name of a pre-existing IBM DB2 Server.",
                                 "constraints": {
                                     "required": true                                
@@ -284,6 +284,13 @@
                                 "constraints": {
                                     "required": true
                                 }
+                            },
+                            {
+                                "name": "db2DSJndiName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Data source JNDI name",
+                                "defaultValue": "jdbc/Sample",
+                                "toolTip": "The JNDI name of the data source to be created."
                             }
                         ],
                         "visible": "[bool(steps('DB2ServerConnectionConfig').connectToDB2Server)]"
@@ -310,7 +317,8 @@
             "db2ServerPortNumber": "[steps('DB2ServerConnectionConfig').connectionInfo.db2ServerPortNumber]",
             "db2DBName": "[steps('DB2ServerConnectionConfig').connectionInfo.db2DBName]",
             "db2DBUserName": "[steps('DB2ServerConnectionConfig').connectionInfo.db2DBUserName]",
-            "db2DBUserPwd": "[steps('DB2ServerConnectionConfig').connectionInfo.db2DBUserPwd]"
+            "db2DBUserPwd": "[steps('DB2ServerConnectionConfig').connectionInfo.db2DBUserPwd]",
+            "db2DSJndiName": "[steps('DB2ServerConnectionConfig').connectionInfo.db2DSJndiName]"
         }
     }
 }
