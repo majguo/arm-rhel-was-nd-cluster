@@ -105,6 +105,10 @@
 #### Store logos
 
 - [marketing-artifacts](https://github.com/majguo/arm-rhel-was-nd-cluster/tree/master/src/main/resources/marketing-artifacts)
+  - Small: 48*48
+  - Medium: 90*90
+  - Large: 216*216
+  - Wide: 255*115
 
 #### Hero
 
@@ -143,9 +147,6 @@
 
 #### Cloud availability
   - Public azure
-
-- SKU ID
-  - 20191207-arm-rhel-was-nd-v9-cluster
 
 ### Plan listing
 
