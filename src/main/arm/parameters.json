@@ -35,15 +35,6 @@
         "numberOfNodes": {
             "value": "${numberOfNodes}"
         },
-        "addressPrefix": {
-            "value": "${addressPrefix}"
-        },
-        "subnetName": {
-            "value": "${subnetName}"
-        },
-        "subnetAddressPrefix": {
-            "value": "${subnetAddressPrefix}"
-        },
         "connectToDB2Server": {
             "value": "${connectToDB2Server}"
         },
