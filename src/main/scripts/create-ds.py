@@ -41,11 +41,11 @@ AdminConfig.create('J2EEResourceProperty', propSet, [["name", "portNumber"], ["v
 # Create CMP Connection factory
 rra = AdminConfig.getid("/ServerCluster:${CLUSTER_NAME}/J2CResourceAdapter:WebSphere Relational Resource Adapter/")
 cmpAttrs = []
-cmpAttrs.append ( ["name", "DB2DataSource_CF"] )
-cmpAttrs.append ( ["authMechanismPreference", "BASIC_PASSWORD"] )
-cmpAttrs.append ( ["authDataAlias", userAlias] )
-cmpAttrs.append ( ["cmpDatasource", newds] )
-cf = AdminConfig.create("CMPConnectorFactory", rra,  cmpAttrs)
+cmpAttrs.append(["name", "DB2DataSource_CF"])
+cmpAttrs.append(["authMechanismPreference", "BASIC_PASSWORD"])
+cmpAttrs.append(["authDataAlias", userAlias])
+cmpAttrs.append(["cmpDatasource", newds])
+cf = AdminConfig.create("CMPConnectorFactory", rra, cmpAttrs)
 
 # Save configuratoin changes and restart node agents
 AdminConfig.save()
