@@ -50,4 +50,3 @@ cf = AdminConfig.create("CMPConnectorFactory", rra, cmpAttrs)
 # Save configuratoin changes and restart node agents
 AdminConfig.save()
 AdminNodeManagement.syncActiveNodes()
-AdminNodeManagement.restartActiveNodes()
