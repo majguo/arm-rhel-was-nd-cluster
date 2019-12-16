@@ -72,21 +72,27 @@
             "type": "bool"
         },
         "db2ServerName": {
+            "defaultValue": "",
             "type": "string"
         },
         "db2ServerPortNumber": {
+            "defaultValue": "",
             "type": "string"
         },
         "db2DBName": {
+            "defaultValue": "",
             "type": "string"
         },
         "db2DBUserName": {
+            "defaultValue": "",
             "type": "string"
         },
         "db2DBUserPwd": {
+            "defaultValue": "",
             "type": "securestring"
         },
         "db2DSJndiName": {
+            "defaultValue": "",
             "type": "string"
         }
     },
