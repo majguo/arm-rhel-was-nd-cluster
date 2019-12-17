@@ -41,6 +41,26 @@
                 }
             },
             {
+                "name": "dynamic",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Dynamic cluster?",
+                "defaultValue": "No",
+                "toolTip": "Select 'Yes' to create a dynamic cluster which enables WebSphere to start/stop nodes on-demand dynamically.",
+                "constraints": {
+                "allowedValues": [
+                    {
+                        "label": "Yes",
+                        "value": "true"
+                    },
+                    {
+                        "label": "No",
+                        "value": "false"
+                    }
+                ],
+                "required": true
+                }
+            },
+            {
                 "name": "dnsLabelPrefix",
                 "type": "Microsoft.Common.TextBox",
                 "label": "DNS Label Prefix",
@@ -303,6 +323,7 @@
             "numberOfNodes": "[int(basics('numberOfNodes'))]",
             "dmgrVMPrefix": "[basics('dmgrVMPrefix')]",
             "managedVMPrefix": "[basics('managedVMPrefix')]",
+            "dynamic": "[bool(basics('dynamic'))]",
             "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
             "vmSize": "[steps('VirtualMachineConfig').vmSizeSelect]",
             "ibmUserId": "[steps('Prerequisites').Credentials.IBMidUsername]",
