@@ -5,26 +5,11 @@
         "_artifactsLocation": {
             "value": "${artifactsLocationBase}/${project.artifactId}/${git.tag}/src/main/"
         },
-        "ibmUserId": {
-            "value": "${ibmUserId}"
+        "dynamic": {
+            "value": "${dynamic}"
         },
-        "ibmUserPwd": {
-            "value": "${ibmUserPwd}"
-        },
-        "adminUser": {
-            "value": "${adminUser}"
-        },
-        "adminPwd": {
-            "value": "${adminPwd}"
-        },
-        "vmAdminId": {
-            "value": "${vmAdminId}"
-        },
-        "vmAdminPwd": {
-            "value": "${vmAdminPwd}"
-        },
-        "dnsLabelPrefix":{
-            "value": "${dnsLabelPrefix}"
+        "numberOfNodes": {
+            "value": "${numberOfNodes}"
         },
         "dmgrVMPrefix": {
             "value": "${dmgrVMPrefix}"
@@ -32,11 +17,26 @@
         "managedVMPrefix": {
             "value": "${managedVMPrefix}"
         },
-        "numberOfNodes": {
-            "value": "${numberOfNodes}"
+        "dnsLabelPrefix":{
+            "value": "${dnsLabelPrefix}"
         },
-        "dynamic": {
-            "value": "${dynamic}"
+        "ibmUserId": {
+            "value": "${ibmUserId}"
+        },
+        "ibmUserPwd": {
+            "value": "${ibmUserPwd}"
+        },
+        "vmAdminId": {
+            "value": "${vmAdminId}"
+        },
+        "vmAdminPwd": {
+            "value": "${vmAdminPwd}"
+        },
+        "adminUser": {
+            "value": "${adminUser}"
+        },
+        "adminPwd": {
+            "value": "${adminPwd}"
         },
         "connectToDB2Server": {
             "value": "${connectToDB2Server}"

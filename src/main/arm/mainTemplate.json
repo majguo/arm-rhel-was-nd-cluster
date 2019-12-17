@@ -10,38 +10,14 @@
 			"type": "securestring",
 			"defaultValue": ""
 		},
-        "installKitUri": {
-            "type": "string"
+        "location":{
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
         },
-        "ibmUserId": {
-            "type": "string"
-        },
-        "ibmUserPwd": {
-            "type": "securestring"
-        },
-        "adminUser": {
-            "type": "string"
-        },
-        "adminPwd": {
-            "type": "securestring"
-        },
-        "vmAdminId": {
-            "type": "string"
-        },
-        "vmAdminPwd": {
-            "type": "securestring"
-        },
-        "vmSize": {
-            "defaultValue": "Standard_D2_v3",
-            "type": "string"
-        },
-        "osDiskType": {
-            "defaultValue": "StandardSSD_LRS",
-            "type": "string"
-        },
-        "dnsLabelPrefix":{
-            "type": "string"
-        },
+        "dynamic": {
+            "defaultValue": false,
+            "type": "bool"
+        },        
 		"numberOfNodes": {
 			"type": "int"
 		},
@@ -51,9 +27,16 @@
         "managedVMPrefix": {
 			"type": "string"
 		},
-        "dynamic": {
-            "defaultValue": false,
-            "type": "bool"
+        "dnsLabelPrefix":{
+            "type": "string"
+        },
+        "vmSize": {
+            "defaultValue": "Standard_D2_v3",
+            "type": "string"
+        },
+        "osDiskType": {
+            "defaultValue": "StandardSSD_LRS",
+            "type": "string"
         },
         "addressPrefix": {
             "defaultValue": "10.0.0.0/16",
@@ -67,9 +50,26 @@
             "defaultValue": "10.0.1.0/24",
             "type": "string"
         },
-        "location":{
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]"
+        "ibmUserId": {
+            "type": "string"
+        },
+        "ibmUserPwd": {
+            "type": "securestring"
+        },
+        "vmAdminId": {
+            "type": "string"
+        },
+        "vmAdminPwd": {
+            "type": "securestring"
+        },
+        "adminUser": {
+            "type": "string"
+        },
+        "adminPwd": {
+            "type": "securestring"
+        },
+        "installKitUri": {
+            "type": "string"
         },
         "connectToDB2Server": {
             "defaultValue": false,

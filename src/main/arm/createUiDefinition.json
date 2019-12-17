@@ -5,6 +5,26 @@
     "parameters": {
         "basics": [
             {
+                "name": "dynamic",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Dynamic cluster?",
+                "defaultValue": "No",
+                "toolTip": "Select 'Yes' to create a dynamic cluster which enables WebSphere to start/stop nodes on-demand dynamically.",
+                "constraints": {
+                    "allowedValues": [
+                        {
+                            "label": "Yes",
+                            "value": "true"
+                        },
+                        {
+                            "label": "No",
+                            "value": "false"
+                        }
+                    ],
+                    "required": true
+                }
+            },
+            {
                 "name": "numberOfNodes",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Number of VMs",
@@ -38,26 +58,6 @@
                     "required": true,
                     "regex": "^[a-z0-9A-Z]{3,20}$",
                     "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
-                }
-            },
-            {
-                "name": "dynamic",
-                "type": "Microsoft.Common.OptionsGroup",
-                "label": "Dynamic cluster?",
-                "defaultValue": "No",
-                "toolTip": "Select 'Yes' to create a dynamic cluster which enables WebSphere to start/stop nodes on-demand dynamically.",
-                "constraints": {
-                "allowedValues": [
-                    {
-                        "label": "Yes",
-                        "value": "true"
-                    },
-                    {
-                        "label": "No",
-                        "value": "false"
-                    }
-                ],
-                "required": true
                 }
             },
             {
@@ -320,10 +320,10 @@
         ],
         "outputs": {
             "location": "[location()]",
+            "dynamic": "[bool(basics('dynamic'))]",
             "numberOfNodes": "[int(basics('numberOfNodes'))]",
             "dmgrVMPrefix": "[basics('dmgrVMPrefix')]",
             "managedVMPrefix": "[basics('managedVMPrefix')]",
-            "dynamic": "[bool(basics('dynamic'))]",
             "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
             "vmSize": "[steps('VirtualMachineConfig').vmSizeSelect]",
             "ibmUserId": "[steps('Prerequisites').Credentials.IBMidUsername]",
