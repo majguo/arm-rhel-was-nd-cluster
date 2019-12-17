@@ -35,6 +35,9 @@
         "numberOfNodes": {
             "value": "${numberOfNodes}"
         },
+        "dynamic": {
+            "value": "${dynamic}"
+        },
         "connectToDB2Server": {
             "value": "${connectToDB2Server}"
         },

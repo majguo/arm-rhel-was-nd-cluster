@@ -58,6 +58,7 @@ create_cluster() {
     cellName=$3
     clusterName=$4
     members=$5
+    dynamic=$6
 
     nodes=( $(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.list('Node')" \
         | grep -Po "(?<=\/nodes\/)[^|]*(?=|.*)" | grep -v $dmgrNode | sed 's/^/"/;s/$/"/') )
@@ -69,15 +70,24 @@ create_cluster() {
             | grep -Po "(?<=\/nodes\/)[^|]*(?=|.*)" | grep -v $dmgrNode | sed 's/^/"/;s/$/"/') )
     done
     sleep 60
-    echo "all nodes are managed, creating cluster..."
-    nodes_string=$( IFS=,; echo "${nodes[*]}" )
 
-    cp create-cluster.py create-cluster.py.bak
-    sed -i "s/\${CELL_NAME}/${cellName}/g" create-cluster.py
-    sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-cluster.py
-    sed -i "s/\${NODES_STRING}/${nodes_string}/g" create-cluster.py
+    if [ "$dynamic" = True ]; then
+        echo "all nodes are managed, creating dynamic cluster..."
+        cp create-dcluster.py create-dcluster.py.bak
+        sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-dcluster.py
+        sed -i "s/\${NODE_GROUP_NAME}/DefaultNodeGroup/g" create-dcluster.py
+        sed -i "s/\${CORE_GROUP_NAME}/DefaultCoreGroup/g" create-dcluster.py
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-dcluster.py
+    else
+        echo "all nodes are managed, creating cluster..."
+        nodes_string=$( IFS=,; echo "${nodes[*]}" )
+        cp create-cluster.py create-cluster.py.bak
+        sed -i "s/\${CELL_NAME}/${cellName}/g" create-cluster.py
+        sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-cluster.py
+        sed -i "s/\${NODES_STRING}/${nodes_string}/g" create-cluster.py
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-cluster.py
+    fi
 
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-cluster.py
     echo "cluster \"${clusterName}\" is successfully created!"
 }
 
@@ -155,7 +165,7 @@ copy_db2_drivers() {
     find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
-while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:j:" opt; do
+while getopts "l:u:p:m:c:f:h:r:x:n:t:d:i:s:j:" opt; do
     case $opt in
         l)
             imKitLocation=$OPTARG #SAS URI of the IBM Installation Manager install kit in Azure Storage
@@ -180,6 +190,9 @@ while getopts "l:u:p:m:c:f:h:r:n:t:d:i:s:j:" opt; do
         ;;
         r)
             members=$OPTARG #Number of cluster members
+        ;;
+        x)
+            dynamic=$OPTARG #Flag indicating whether to create a dynamic cluster or not
         ;;
         n)
             db2ServerName=$OPTARG #Host name/IP address of IBM DB2 Server
@@ -234,7 +247,7 @@ if [ "$dmgr" = True ]; then
     add_admin_credentials_to_soap_client_props Dmgr001 "$adminUserName" "$adminPassword"
     create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
-    create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members
+    create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members $dynamic
     create_data_source Dmgr001 MyCluster "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$db2DSJndiName"
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
