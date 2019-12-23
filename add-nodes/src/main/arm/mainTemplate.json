@@ -38,10 +38,6 @@
             "defaultValue": "StandardSSD_LRS",
             "type": "string"
         },
-        "subnetName": {
-            "defaultValue": "subnet01",
-            "type": "string"
-        },
         "ibmUserId": {
             "type": "string"
         },
@@ -63,6 +59,9 @@
         "installKitUri": {
             "type": "string"
         },
+        "subnetId": {
+            "type": "string"
+		},
         "storageAccountName": {
             "type": "string"
 		}
@@ -70,9 +69,6 @@
     "variables": {
         "dmgrVMName": "[concat(parameters('dmgrVMPrefix'), 'VM')]",
         "managedVMPrefix": "[concat(parameters('managedVMPrefix'), 'VM')]",
-        "virtualNetworkName": "[concat(parameters('dnsLabelPrefix'), '-vnet')]",
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), parameters('subnetName'))]",
-        "storageRef": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "arguments": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('dmgrVMName'),' -r ',parameters('numberOfNodes'),' -x ',parameters('dynamic'))]"
     },
@@ -116,8 +112,7 @@
 				"count": "[parameters('numberOfNodes')]"
 			},
             "dependsOn": [
-                "publicIPLoop",
-                "[variables('subnetRef')]"
+                "publicIPLoop"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -129,7 +124,7 @@
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('managedVMPrefix'), copyIndex(1), '-ip'))]"
                             },
                             "subnet": {
-                                "id": "[variables('subnetRef')]"
+                                "id": "[parameters('subnetId')]"
                             }
                         }
                     }
@@ -175,14 +170,14 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('managedVMPrefix'), copyIndex(1)), '-if')]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('managedVMPrefix'), copyIndex(1), '-if'))]"
                         }
                     ]
                 },
 				"diagnosticsProfile": {
 					"bootDiagnostics": {
 						"enabled": true,
-						"storageUri": "[reference(variables('storageRef'), '2019-06-01').primaryEndpoints.blob]"
+						"storageUri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/')]"
 					}
 				}
             }

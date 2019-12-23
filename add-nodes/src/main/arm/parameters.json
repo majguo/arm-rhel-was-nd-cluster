@@ -37,7 +37,10 @@
         },
         "adminPwd": {
             "value": "${adminPwd}"
-        },
+        }, 
+        "subnetId": {
+            "value": "${subnetId}"
+		},
         "storageAccountName": {
             "value": "${storageAccountName}"
         }
