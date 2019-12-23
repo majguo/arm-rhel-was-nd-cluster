@@ -18,6 +18,7 @@
     <name>${project.artifactId}</name>
 
     <properties>
+        <git.proj>arm-rhel-was-nd-cluster</git.proj>
         <tracking.pid>8dce0bb2-67ed-5ac5-a3e6-d9331d86ed52</tracking.pid>
         <template.validation.tests.directory>${basedir}/../../azure-quickstart-templates/test/arm-ttk</template.validation.tests.directory>
     </properties>
