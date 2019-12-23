@@ -1,0 +1,45 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "_artifactsLocation": {
+            "value": "${artifactsLocationBase}/${project.artifactId}/${git.tag}/add-nodes/src/main/"
+        },
+        "dynamic": {
+            "value": "${dynamic}"
+        },
+        "numberOfNodes": {
+            "value": "${numberOfNodes}"
+        },
+        "dmgrVMPrefix": {
+            "value": "${dmgrVMPrefix}"
+        },
+        "managedVMPrefix": {
+            "value": "${managedVMPrefix}"
+        },
+        "dnsLabelPrefix":{
+            "value": "${dnsLabelPrefix}"
+        },
+        "ibmUserId": {
+            "value": "${ibmUserId}"
+        },
+        "ibmUserPwd": {
+            "value": "${ibmUserPwd}"
+        },
+        "vmAdminId": {
+            "value": "${vmAdminId}"
+        },
+        "vmAdminPwd": {
+            "value": "${vmAdminPwd}"
+        },
+        "adminUser": {
+            "value": "${adminUser}"
+        },
+        "adminPwd": {
+            "value": "${adminPwd}"
+        },
+        "storageAccountName": {
+            "value": "${storageAccountName}"
+        }
+    }
+}
