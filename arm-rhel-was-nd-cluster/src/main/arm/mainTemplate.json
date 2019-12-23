@@ -98,7 +98,11 @@
         "db2DSJndiName": {
             "defaultValue": "",
             "type": "string"
-        }
+        },
+        "guidValue": {
+			"defaultValue": "[newGuid()]",
+            "type": "string"
+		}
     },
     "variables": {
         "dmgrVMName": "[concat(parameters('dmgrVMPrefix'), 'VM')]",
@@ -108,8 +112,7 @@
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), parameters('subnetName'))]",
         "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-        "guidValue": "[newGuid()]",
-        "storageAccountName": "[concat(take(replace(variables('guidValue'),'-',''),6), 'rhel')]",
+        "storageAccountName": "[concat(take(replace(parameters('guidValue'),'-',''),6), 'rhel')]",
         "storageRef": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "arguments1": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('dmgrVMName'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
