@@ -2,4 +2,13 @@ test-files
 target
 .project
 .settings
+.classpath
 *.versionsBackup
+
+**/test-files
+**/target
+**/.project
+**/.settings
+**/.classpath
+**/*.versionsBackup
+

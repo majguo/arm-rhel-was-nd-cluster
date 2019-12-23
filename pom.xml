@@ -4,21 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ibm.websphere.azure</groupId>
-    <artifactId>arm-rhel-was-nd-cluster</artifactId>
-    <version>1.0.8</version>
-    
-    <parent>
-        <groupId>com.microsoft.azure.iaas</groupId>
-        <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.1</version>
-        <relativePath></relativePath>
-    </parent>
-    
-    <packaging>jar</packaging>
+    <artifactId>arm-rhel-was-nd-cluster-root</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
     <name>${project.artifactId}</name>
 
-    <properties>
-        <tracking.pid>pid-6801777e-8fdd-5241-b640-379957dd3e89</tracking.pid>
-        <template.validation.tests.directory>${basedir}/../azure-quickstart-templates/test/arm-ttk</template.validation.tests.directory>
-    </properties>
+    <modules>
+      <module>arm-rhel-was-nd-cluster</module>
+      <module>add-nodes</module>
+    </modules>
 </project>
