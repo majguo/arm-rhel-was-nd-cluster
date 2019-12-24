@@ -108,7 +108,7 @@ copy_db2_drivers() {
     find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
-while getopts "l:u:p:m:c:h:r:x:n:t:d:i:s:j:" opt; do
+while getopts "l:u:p:m:c:s:d:r:h:o:" opt; do
     case $opt in
         l)
             imKitLocation=$OPTARG #SAS URI of the IBM Installation Manager install kit in Azure Storage
@@ -125,32 +125,20 @@ while getopts "l:u:p:m:c:h:r:x:n:t:d:i:s:j:" opt; do
         c)
             adminPassword=$OPTARG #Password for administrating WebSphere Admin Console
         ;;
-        h)
-            dmgrHostName=$OPTARG #Host name of deployment manager server
-        ;;
-        r)
-            members=$OPTARG #Number of cluster members
-        ;;
-        x)
-            dynamic=$OPTARG #Flag indicating whether to create a dynamic cluster or not
-        ;;
-        n)
-            db2ServerName=$OPTARG #Host name/IP address of IBM DB2 Server
-        ;;
-        t)
-            db2ServerPortNumber=$OPTARG #Server port number of IBM DB2 Server
+        s)
+            clusterName=$OPTARG #Name of the existing cluster
         ;;
         d)
-            db2DBName=$OPTARG #Database name of IBM DB2 Server
+            nodeGroupName=$OPTARG #Name of the existing node group created in deployment manager server
         ;;
-        i)
-            db2DBUserName=$OPTARG #Database user name of IBM DB2 Server
+        r)
+            coreGroupName=$OPTARG #Name of the existing core group created in deployment manager server
         ;;
-        s)
-            db2DBUserPwd=$OPTARG #Database user password of IBM DB2 Server
+        h)
+            dmgrHostName=$OPTARG #Host name of the existing deployment manager server
         ;;
-        j)
-            db2DSJndiName=$OPTARG #Datasource JNDI name
+        o)
+            dmgrPort=$OPTARG #Port number of the existing deployment manager server
         ;;
     esac
 done
@@ -182,14 +170,8 @@ unzip -q "$imKitName" -d im_installer
     -secureStorageFile storage_file -acceptLicense -showProgress
 
 # Add nodes to existing cluster
-add_node Custom $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"
+add_node Custom $(hostname)Node01 "$dmgrHostName" "$dmgrPort" "$adminUserName" "$adminPassword" "$nodeGroupName" "$coreGroupName"
 add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
-add_to_cluster Custom $(hostname)Node01
+add_to_cluster Custom $(hostname)Node01 "$clusterName"
 create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
 copy_db2_drivers
-
-if [ "$dynamic" = True ]; then
-    echo "Add nodes to dynamic cluster"
-else
-    echo "Add nodes to static cluster"
-fi
