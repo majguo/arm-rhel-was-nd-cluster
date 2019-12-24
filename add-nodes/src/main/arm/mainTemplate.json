@@ -61,9 +61,6 @@
         },
         "subnetId": {
             "type": "string"
-		},
-        "storageAccountName": {
-            "type": "string"
 		}
     },
     "variables": {
@@ -173,13 +170,7 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('managedVMPrefix'), copyIndex(1), '-if'))]"
                         }
                     ]
-                },
-				"diagnosticsProfile": {
-					"bootDiagnostics": {
-						"enabled": true,
-						"storageUri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net/')]"
-					}
-				}
+                }
             }
         },
         {
@@ -201,7 +192,8 @@
                 "typeHandlerVersion": "2.0",
                 "settings": {
                     "fileUris": [
-                        "[uri(variables('scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]"
+                        "[uri(variables('scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('scriptLocation'), concat('add-to-cluster.py', parameters('_artifactsLocationSasToken')))]"
                     ],
                     "commandToExecute": "[concat('sh install.sh', variables('arguments'))]"
                 }

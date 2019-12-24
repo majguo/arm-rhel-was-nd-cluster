@@ -40,9 +40,6 @@
         }, 
         "subnetId": {
             "value": "${subnetId}"
-		},
-        "storageAccountName": {
-            "value": "${storageAccountName}"
-        }
+		}
     }
 }
