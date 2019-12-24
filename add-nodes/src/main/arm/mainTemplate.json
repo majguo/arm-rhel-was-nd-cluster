@@ -13,23 +13,34 @@
         "location":{
             "type": "string",
             "defaultValue": "[resourceGroup().location]"
-        },
-        "dynamic": {
-            "defaultValue": false,
-            "type": "bool"
-        },        
+        },      
 		"numberOfNodes": {
 			"type": "int"
 		},
-		"dmgrVMPrefix": {
-			"type": "string"
-        },
         "managedVMPrefix": {
 			"type": "string"
 		},
         "dnsLabelPrefix":{
             "type": "string"
         },
+        "clusterName": {
+            "type": "string"
+        },
+		"nodeGroupName": {
+			"type": "string"
+        },
+        "coreGroupName": {
+			"type": "string"
+        },
+        "dmgrHostName": {
+			"type": "string"
+        },
+        "dmgrPort": {
+			"type": "string"
+        },
+        "subnetId": {
+            "type": "string"
+		},
         "vmSize": {
             "defaultValue": "Standard_D2_v3",
             "type": "string"
@@ -59,15 +70,16 @@
         "installKitUri": {
             "type": "string"
         },
-        "subnetId": {
+        "guidValue": {
+			"defaultValue": "[newGuid()]",
             "type": "string"
 		}
     },
     "variables": {
-        "dmgrVMName": "[concat(parameters('dmgrVMPrefix'), 'VM')]",
-        "managedVMPrefix": "[concat(parameters('managedVMPrefix'), 'VM')]",
+        "managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
+        "dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
-        "arguments": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('dmgrVMName'),' -r ',parameters('numberOfNodes'),' -x ',parameters('dynamic'))]"
+        "arguments": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -s ',parameters('clusterName'),' -d ',parameters('nodeGroupName'),' -r ',parameters('coreGroupName'),' -h ',parameters('dmgrHostName'),' -o ',parameters('dmgrPort'))]"
     },
     "resources": [
         { 
@@ -95,7 +107,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings":{
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')), concat('-mn', copyIndex(1)))]"
+                    "domainNameLabel": "[concat(toLower(variables('dnsLabelPrefix')), concat('-mn', copyIndex(1)))]"
                 }
             }
         },

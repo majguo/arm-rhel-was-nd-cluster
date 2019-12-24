@@ -5,14 +5,8 @@
         "_artifactsLocation": {
             "value": "${artifactsLocationBase}/${git.proj}/${git.tag}/${project.artifactId}/src/main/"
         },
-        "dynamic": {
-            "value": "${dynamic}"
-        },
         "numberOfNodes": {
             "value": "${numberOfNodes}"
-        },
-        "dmgrVMPrefix": {
-            "value": "${dmgrVMPrefix}"
         },
         "managedVMPrefix": {
             "value": "${managedVMPrefix}"
@@ -20,6 +14,24 @@
         "dnsLabelPrefix":{
             "value": "${dnsLabelPrefix}"
         },
+        "clusterName": {
+            "value": "${clusterName}"
+        },
+		"nodeGroupName": {
+			"value": "${nodeGroupName}"
+        },
+        "coreGroupName": {
+			"value": "${coreGroupName}"
+        },
+        "dmgrHostName": {
+			"value": "${dmgrHostName}"
+        },
+        "dmgrPort": {
+			"value": "${dmgrPort}"
+        },
+        "subnetId": {
+            "value": "${subnetId}"
+		},
         "ibmUserId": {
             "value": "${ibmUserId}"
         },
@@ -37,9 +49,6 @@
         },
         "adminPwd": {
             "value": "${adminPwd}"
-        }, 
-        "subnetId": {
-            "value": "${subnetId}"
-		}
+        }
     }
 }
