@@ -1,15 +1,34 @@
 #!/bin/sh
 
-create_dmgr_profile() {
+add_node() {
     profileName=$1
     nodeName=$2
-    cellName=$3
-    adminUserName=$4
-    adminPassword=$5
+    dmgrHostName=$3
+    dmgrPort=$4
+    userName=$5
+    password=$6
+    nodeGroupName=${7:-DefaultNodeGroup}
+    coreGroupName=${8:-DefaultCoreGroup}
+    
+    curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "dmgr is not available, exiting now..."
+        exit 1
+    fi
+    echo "dmgr is ready to add nodes"
 
-    /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName ${profileName} \
-        -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/management -serverType DEPLOYMENT_MANAGER \
-        -nodeName ${nodeName} -cellName ${cellName} -enableAdminSecurity true -adminUserName ${adminUserName} -adminPassword ${adminPassword}
+    /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName -nodeName $nodeName \
+        -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed
+    output=$(/opt/IBM/WebSphere/ND/V9/bin/addNode.sh $dmgrHostName $dmgrPort -username $userName -password $password \
+        -nodegroupname "$nodeGroupName" -coregroupname "$coreGroupName" -profileName $profileName 2>&1)
+    while echo $output | grep -qv "has been successfully federated"
+    do
+        sleep 10
+        echo "adding node failed, retry it later..."
+        output=$(/opt/IBM/WebSphere/ND/V9/bin/addNode.sh $dmgrHostName $dmgrPort -username $userName -password $password \
+            -nodegroupname "$nodeGroupName" -coregroupname "$coreGroupName" -profileName $profileName 2>&1)
+    done
+    echo $output
 }
 
 add_admin_credentials_to_soap_client_props() {
@@ -25,6 +44,35 @@ add_admin_credentials_to_soap_client_props() {
 
     # Encrypt com.ibm.SOAP.loginPassword
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
+}
+
+add_to_cluster() {
+    profileName=$1
+    nodeName=$2
+    clusterName=${3:-MyCluster}
+
+    # Validation check 
+    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.getid('/DynamicCluster:${clusterName}')" 2>&1)
+    if echo $output | grep -q "/dynamicclusters/${clusterName}|"; then
+        echo "${clusterName} is a dynamic cluster, no further operation is required"
+        exit 0
+    fi
+
+    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.getid('/ServerCluster:${clusterName}')" 2>&1)
+    if echo $output | grep -qv "/clusters/${clusterName}|"; then
+        echo "${clusterName} is not a valid cluster, quit"
+        exit 1
+    fi
+
+    # Add node to cluster
+    cp add-to-cluster.py add-to-cluster.py.bak
+    sed -i "s/\${NODE_NAME}/${nodeName}/g" add-to-cluster.py
+    sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" add-to-cluster.py
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f add-to-cluster.py
+   
+    # Start cluster member server
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh server_${nodeName}
+    echo "Node ${nodeName} is successfully added to cluster ${clusterName}"
 }
 
 create_systemd_service() {
@@ -50,77 +98,6 @@ create_systemd_service() {
     # Enable service
     systemctl daemon-reload
     systemctl enable "$srvName"
-}
-
-create_cluster() {
-    profileName=$1
-    dmgrNode=$2
-    cellName=$3
-    clusterName=$4
-    members=$5
-    dynamic=$6
-
-    nodes=( $(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.list('Node')" \
-        | grep -Po "(?<=\/nodes\/)[^|]*(?=|.*)" | grep -v $dmgrNode | sed 's/^/"/;s/$/"/') )
-    while [ ${#nodes[@]} -ne $members ]
-    do
-        sleep 5
-        echo "adding more nodes..."
-        nodes=( $(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.list('Node')" \
-            | grep -Po "(?<=\/nodes\/)[^|]*(?=|.*)" | grep -v $dmgrNode | sed 's/^/"/;s/$/"/') )
-    done
-    sleep 60
-
-    if [ "$dynamic" = True ]; then
-        echo "all nodes are managed, creating dynamic cluster..."
-        cp create-dcluster.py create-dcluster.py.bak
-        sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-dcluster.py
-        sed -i "s/\${NODE_GROUP_NAME}/DefaultNodeGroup/g" create-dcluster.py
-        sed -i "s/\${CORE_GROUP_NAME}/DefaultCoreGroup/g" create-dcluster.py
-        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-dcluster.py
-    else
-        echo "all nodes are managed, creating cluster..."
-        nodes_string=$( IFS=,; echo "${nodes[*]}" )
-        cp create-cluster.py create-cluster.py.bak
-        sed -i "s/\${CELL_NAME}/${cellName}/g" create-cluster.py
-        sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" create-cluster.py
-        sed -i "s/\${NODES_STRING}/${nodes_string}/g" create-cluster.py
-        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-cluster.py
-    fi
-
-    echo "cluster \"${clusterName}\" is successfully created!"
-}
-
-create_custom_profile() {
-    profileName=$1
-    dmgrHostName=$2
-    dmgrPort=$3
-    dmgrAdminUserName=$4
-    dmgrAdminPassword=$5
-    
-    curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
-    while [ $? -ne 0 ]
-    do
-        sleep 5
-        echo "dmgr is not ready"
-        curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
-    done
-    sleep 60
-    echo "dmgr is ready to add nodes"
-
-    output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
-        -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
-        -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
-    while echo $output | grep -qv "SUCCESS"
-    do
-        sleep 10
-        echo "adding node failed, retry it later..."
-        rm -rf /opt/IBM/WebSphere/ND/V9/profiles/$profileName
-        output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
-            -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
-            -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
-    done
-    echo $output
 }
 
 copy_db2_drivers() {
@@ -205,8 +182,9 @@ unzip -q "$imKitName" -d im_installer
     -secureStorageFile storage_file -acceptLicense -showProgress
 
 # Add nodes to existing cluster
-create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
+add_node Custom $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"
 add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
+add_to_cluster Custom $(hostname)Node01
 create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
 copy_db2_drivers
 
