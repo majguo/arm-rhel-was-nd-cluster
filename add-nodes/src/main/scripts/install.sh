@@ -3,10 +3,10 @@
 add_node() {
     profileName=$1
     nodeName=$2
-    dmgrHostName=$3
-    dmgrPort=$4
-    userName=$5
-    password=$6
+    userName=$3
+    password=$4    
+    dmgrHostName=$5
+    dmgrPort=${6:-8879}
     nodeGroupName=${7:-DefaultNodeGroup}
     coreGroupName=${8:-DefaultCoreGroup}
     
@@ -170,7 +170,7 @@ unzip -q "$imKitName" -d im_installer
     -secureStorageFile storage_file -acceptLicense -showProgress
 
 # Add nodes to existing cluster
-add_node Custom $(hostname)Node01 "$dmgrHostName" "$dmgrPort" "$adminUserName" "$adminPassword" "$nodeGroupName" "$coreGroupName"
+add_node Custom $(hostname)Node01 "$adminUserName" "$adminPassword" "$dmgrHostName" "$dmgrPort" "$nodeGroupName" "$coreGroupName"
 add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
 add_to_cluster Custom $(hostname)Node01 "$clusterName"
 create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
