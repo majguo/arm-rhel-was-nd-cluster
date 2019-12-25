@@ -44,10 +44,6 @@
         "subnetName": {
             "type": "string"
 		},
-        "subnetId": {
-            "type": "string",
-            "defaultValue": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('vNetName'),'/subnets/',parameters('subnetName'))]"
-		},
         "vmSize": {
             "type": "string",
             "defaultValue": "Standard_D2_v3"
@@ -85,6 +81,7 @@
     "variables": {
         "managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
         "dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "arguments": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -s ',parameters('clusterName'),' -d ',parameters('nodeGroupName'),' -r ',parameters('coreGroupName'),' -h ',parameters('dmgrHostName'),' -o ',parameters('dmgrPort'))]"
     },
@@ -101,7 +98,20 @@
                     "resources": []
                 }
             }
-        },      
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('vNetName')]",
+            "condition": "[empty(parameters('vNetName'))]",
+            "location": "[parameters('location')]"
+        },        
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('vNetName'), '/', parameters('subnetName'))]",
+            "condition": "[empty(parameters('subnetName'))]"
+        },
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-06-01",
@@ -140,7 +150,7 @@
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('managedVMPrefix'), copyIndex(1), '-ip'))]"
                             },
                             "subnet": {
-                                "id": "[parameters('subnetId')]"
+                                "id": "[variables('subnetRef')]"
                             }
                         }
                     }
