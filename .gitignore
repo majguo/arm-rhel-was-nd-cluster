@@ -4,6 +4,7 @@ target
 .settings
 .classpath
 *.versionsBackup
+.vscode
 
 **/test-files
 **/target
