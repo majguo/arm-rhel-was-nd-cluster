@@ -98,19 +98,12 @@
                     "resources": []
                 }
             }
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2019-06-01",
-            "name": "[parameters('vNetName')]",
-            "condition": "[empty(parameters('vNetName'))]",
-            "location": "[parameters('location')]"
-        },        
+        },       
         {
             "type": "Microsoft.Network/virtualNetworks/subnets",
             "apiVersion": "2019-06-01",
             "name": "[concat(parameters('vNetName'), '/', parameters('subnetName'))]",
-            "condition": "[empty(parameters('subnetName'))]"
+            "condition": "[and(empty(parameters('vNetName')), empty(parameters('subnetName')))]"
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
