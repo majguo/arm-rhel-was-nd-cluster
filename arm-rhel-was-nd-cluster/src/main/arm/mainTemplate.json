@@ -105,10 +105,11 @@
 		}
     },
     "variables": {
-        "dmgrVMName": "[concat(parameters('dmgrVMPrefix'), 'VM')]",
-        "managedVMPrefix": "[concat(parameters('managedVMPrefix'), 'VM')]",
-        "virtualNetworkName": "[concat(parameters('dnsLabelPrefix'), '-vnet')]",
-        "networkSecurityGroupName": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
+        "dmgrVMName": "[concat(parameters('dmgrVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
+        "managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
+        "dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
+        "virtualNetworkName": "[concat(variables('dnsLabelPrefix'), '-vnet')]",
+        "networkSecurityGroupName": "[concat(variables('dnsLabelPrefix'), '-nsg')]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), parameters('subnetName'))]",
         "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -237,7 +238,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings":{
-                    "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')), if(equals(copyIndex(), 0), '', concat('-mn', copyIndex())))]"
+                    "domainNameLabel": "[concat(toLower(variables('dnsLabelPrefix')), if(equals(copyIndex(), 0), '', concat('-mn', copyIndex())))]"
                 }
             }
         },
