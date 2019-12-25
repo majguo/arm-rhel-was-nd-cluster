@@ -38,16 +38,23 @@
         "dmgrPort": {
 			"type": "string"
         },
-        "subnetId": {
+        "vNetName": {
             "type": "string"
 		},
-        "vmSize": {
-            "defaultValue": "Standard_D2_v3",
+        "subnetName": {
             "type": "string"
+		},
+        "subnetId": {
+            "type": "string",
+            "defaultValue": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.Network/virtualNetworks/',parameters('vNetName'),'/subnets/',parameters('subnetName'))]"
+		},
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_D2_v3"
         },
         "osDiskType": {
-            "defaultValue": "StandardSSD_LRS",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "StandardSSD_LRS"
         },
         "ibmUserId": {
             "type": "string"
@@ -71,8 +78,8 @@
             "type": "string"
         },
         "guidValue": {
-			"defaultValue": "[newGuid()]",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "[newGuid()]"
 		}
     },
     "variables": {

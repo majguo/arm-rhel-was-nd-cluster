@@ -29,8 +29,11 @@
         "dmgrPort": {
 			"value": "${dmgrPort}"
         },
-        "subnetId": {
-            "value": "${subnetId}"
+        "vNetName": {
+            "value": "${vNetName}"
+        },
+        "subnetName": {
+            "value": "${subnetName}"
 		},
         "ibmUserId": {
             "value": "${ibmUserId}"
