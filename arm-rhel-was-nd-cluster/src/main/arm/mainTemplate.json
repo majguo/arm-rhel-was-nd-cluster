@@ -351,5 +351,39 @@
                 }
             }
         }     
-    ]
+    ],
+    "outputs": {
+        "adminSecuredConsole": {
+			"type": "string",
+			"value": "[concat('https://',reference(concat(variables('dmgrVMName'), '-ip')).dnsSettings.fqdn,':9043/ibm/console')]"
+		},
+        "clusterName": {
+            "type": "string",
+            "value": "MyCluster"
+        },
+        "nodeGroupName": {
+            "type": "string",
+            "value": "DefaultNodeGroup"
+        },
+        "coreGroupName": {
+            "type": "string",
+            "value": "DefaultCoreGroup"
+        },
+		"dmgrHostName": {
+			"type": "string",
+			"value": "[variables('dmgrVMName')]"
+		},
+        "dmgrPort": {
+            "type": "string",
+            "value": "8879"
+        },
+		"virtualNetworkName": {
+			"type": "string",
+			"value": "[variables('virtualNetworkName')]"
+		},
+		"subnetName": {
+			"type": "string",
+			"value": "[parameters('subnetName')]"
+		}
+	}
 }
