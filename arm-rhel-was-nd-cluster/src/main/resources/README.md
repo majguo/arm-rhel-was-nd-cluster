@@ -137,7 +137,7 @@
 - Plan ID
   - wasndt9-n-cluster
 - Plan name
-  - IBM WebSphere Server ND Traditional V9.0.5 Cluster
+  - Create cluster with specified number of nodes
 
 ### Plan setup
 
@@ -151,7 +151,7 @@
 ### Plan listing
 
 - Name
-  - IBM WebSphere Server ND Traditional V9.0.5 Cluster
+  - Create cluster with specified number of nodes
 - Summary
   - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Description

@@ -31,7 +31,11 @@
 
 ## After deployment
 - If you check the resource group in [azure portal](https://portal.azure.com/), you will see multiple VMs and related resources specified for the cluster created
-- Open VM resource blade of deployment manager and copy its DNS name, then open IBM WebSphere Integrated Solutions Console for further administration by browsing https://<dns_name>:9043/ibm/console
+- To open IBM WebSphere Integrated Solutions Console in browser for further administration:
+  - Login to Azure Portal
+  - Open the resource group you specified to deploy WebSphere Cluster
+  - Navigate to "Deployments > specified_deployment_name > Outputs"
+  - Copy value of property `adminSecuredConsole` and browse it with credentials you specified in cluster creation
 - The deployment manager and node agent running in the cluster will be automatically started whenever the virtual machine is rebooted. In case you want to mannually stop/start/restart the process, using the following commands:
   ```
   /opt/IBM/WebSphere/ND/V9/bin/stopServer.sh <serverName>   # stop server
