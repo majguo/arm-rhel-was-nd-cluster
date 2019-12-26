@@ -19,7 +19,7 @@
             {
                 "name": "managedVMPrefix",
                 "type": "Microsoft.Common.TextBox",
-                "label": "Managed Server Prefix",
+                "label": "Managed server prefix",
                 "toolTip": "The string to prepend to the name of the managed server.",
                 "defaultValue": "managed",
                 "constraints": {
@@ -31,7 +31,7 @@
             {
                 "name": "dnsLabelPrefix",
                 "type": "Microsoft.Common.TextBox",
-                "label": "DNS Label Prefix",
+                "label": "DNS label prefix",
                 "toolTip": "The string to prepend to the DNS label.",
                 "defaultValue": "wasndcluster",
                 "constraints": {
@@ -43,94 +43,13 @@
         ],
         "steps": [
             {
-                "name": "WebSphereCluster",
-                "label": "The existing WebSphere Cluster",
-                "subLabel": {
-                    "preValidation": "Provide the information of the existing WebSphere Cluster.",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "The existing WebSphere Cluster",
-                "elements": [
-                    {
-                        "name": "clusterName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Cluster name",
-                        "toolTip": "The name of the existing cluster.",
-                        "defaultValue": "MyCluster",
-                        "constraints": {
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "nodeGroupName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Node group name",
-                        "toolTip": "The name of the existing node group created in deployment manager server.",
-                        "defaultValue": "DefaultNodeGroup",
-                        "constraints": {
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "coreGroupName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Core group name",
-                        "toolTip": "The name of the existing core group created in deployment manager server.",
-                        "defaultValue": "DefaultCoreGroup",
-                        "constraints": {
-                            "required": true                                
-                        }
-                    },
-                    {
-                        "name": "dmgrHostName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Host name of deployment manager server",
-                        "toolTip": "The host name of the existing deployment manager server.",
-                        "constraints": {
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "dmgrPort",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Port number",
-                        "toolTip": "The port number of the existing deployment manager server.",
-                        "defaultValue": "8879",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[0-9]+$",
-                            "validationMessage": "The value must be numbers."
-                        }
-                    },
-                    {
-                        "name": "vNetName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Virtual network name",
-                        "toolTip": "The name of the existing virtual network in the cluster.",
-                        "constraints": {
-                            "required": true
-                        }
-                    },
-                    {
-                        "name": "subnetName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Subnet name",
-                        "toolTip": "The subnet name of the virtual network in the cluster.",
-                        "defaultValue": "subnet01",
-                        "constraints": {
-                            "required": true
-                        }
-                    }
-                ]
-            },
-            {
                 "name": "VirtualMachineConfig",
-                "label": "Virtual Machine Settings",
+                "label": "Virtual machine settings",
                 "subLabel": {
                     "preValidation": "Configure the resources and settings of the virtual machine that installs IBM WebSphere.",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Virtual Machine Settings",
+                "bladeTitle": "Virtual machine settings",
                 "elements": [
                     {
                         "name": "vmSizeSelect",
@@ -151,22 +70,22 @@
             },
             {
                 "name": "Prerequisites",
-                "label": "Prerequisites for WebSphere Creation",
+                "label": "Prerequisites for WebSphere creation",
                 "subLabel": {
-                    "preValidation": "Provide Prerequisites Required for WebSphere Creation",
+                    "preValidation": "Provide prerequisites required for WebSphere creation",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Prerequisites for WebSphere Creation",
+                "bladeTitle": "Prerequisites for WebSphere creation",
                 "elements": [
                     {
                         "name": "Credentials",
                         "type": "Microsoft.Common.Section",
-                        "label": "Credentials for WebSphere Creation",
+                        "label": "Credentials for WebSphere creation",
                         "elements": [
                             {
                                 "name": "IBMidUsername",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "IBMid Username",
+                                "label": "IBMid username",
                                 "toolTip": "The username of a pre-existing IBMid.",
                                 "constraints": {
                                     "required": true,
@@ -256,8 +175,8 @@
                             {
                                 "name": "uri",
                                 "type": "Microsoft.Common.TextBox",
-                                "toolTip": "You can download it from IBM web site with your IBMid account, upload to Azure Storage and make it available by generating SAS.",
-                                "label": "The Uri to the accessible IBM Installation Manager Installation Kit V1.9",
+                                "toolTip": "You can firstly download the installation kit from IBM web site with your IBMid, then upload to Azure Storage and make it available by generating SAS token and URL.",
+                                "label": "The URL to download IBM Installation Manager Installation Kit V1.9",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(https?:\/\/)?([\\w-])+\\.([a-zA-Z]{2,63})([\/\\w-]*)*\/?\\??([^#\n\r]*)?#?([^\n\r]*)?$",
@@ -267,6 +186,87 @@
                         ]
                     }
                 ]
+            },
+            {
+                "name": "WebSphereCluster",
+                "label": "Information of the existing WebSphere Cluster",
+                "subLabel": {
+                    "preValidation": "Provide the information of the existing WebSphere Cluster.",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "The existing WebSphere Cluster",
+                "elements": [
+                    {
+                        "name": "clusterName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Cluster name",
+                        "toolTip": "The name of the existing cluster.",
+                        "defaultValue": "MyCluster",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "nodeGroupName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Node group name",
+                        "toolTip": "The name of the existing node group created in deployment manager server.",
+                        "defaultValue": "DefaultNodeGroup",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "coreGroupName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Core group name",
+                        "toolTip": "The name of the existing core group created in deployment manager server.",
+                        "defaultValue": "DefaultCoreGroup",
+                        "constraints": {
+                            "required": true                                
+                        }
+                    },
+                    {
+                        "name": "dmgrHostName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Host name of dmgr server",
+                        "toolTip": "The host name of the existing deployment manager server.",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "dmgrPort",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Port number of dmgr server",
+                        "toolTip": "The port number of the existing deployment manager server.",
+                        "defaultValue": "8879",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[0-9]+$",
+                            "validationMessage": "The value must be numbers."
+                        }
+                    },
+                    {
+                        "name": "vNetName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Virtual network name",
+                        "toolTip": "The name of the existing virtual network in the cluster.",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "subnetName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Subnet name",
+                        "toolTip": "The subnet name of the virtual network in the cluster.",
+                        "defaultValue": "subnet01",
+                        "constraints": {
+                            "required": true
+                        }
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -274,13 +274,6 @@
             "numberOfNodes": "[int(basics('numberOfNodes'))]",
             "managedVMPrefix": "[basics('managedVMPrefix')]",
             "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
-            "clusterName": "[steps('WebSphereCluster').clusterName]",
-            "nodeGroupName": "[steps('WebSphereCluster').nodeGroupName]",
-            "coreGroupName": "[steps('WebSphereCluster').coreGroupName]",
-            "dmgrHostName": "[steps('WebSphereCluster').dmgrHostName]",
-            "dmgrPort": "[steps('WebSphereCluster').dmgrPort]",
-            "vNetName": "[steps('WebSphereCluster').vNetName]",
-            "subnetName": "[steps('WebSphereCluster').subnetName]",
             "vmSize": "[steps('VirtualMachineConfig').vmSizeSelect]",
             "ibmUserId": "[steps('Prerequisites').Credentials.IBMidUsername]",
             "ibmUserPwd": "[steps('Prerequisites').Credentials.IBMidPassword]",
@@ -288,7 +281,14 @@
             "vmAdminPwd": "[steps('Prerequisites').Credentials.adminPassword]",
             "adminUser": "[steps('Prerequisites').Credentials.wasAdminUsername]",
             "adminPwd": "[steps('Prerequisites').Credentials.wasAdminPassword]",
-            "installKitUri": "[steps('Prerequisites').IBMInstallKit.uri]"
+            "installKitUri": "[steps('Prerequisites').IBMInstallKit.uri]",
+            "clusterName": "[steps('WebSphereCluster').clusterName]",
+            "nodeGroupName": "[steps('WebSphereCluster').nodeGroupName]",
+            "coreGroupName": "[steps('WebSphereCluster').coreGroupName]",
+            "dmgrHostName": "[steps('WebSphereCluster').dmgrHostName]",
+            "dmgrPort": "[steps('WebSphereCluster').dmgrPort]",
+            "vNetName": "[steps('WebSphereCluster').vNetName]",
+            "subnetName": "[steps('WebSphereCluster').subnetName]"
         }
     }
 }

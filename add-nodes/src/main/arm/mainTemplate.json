@@ -23,27 +23,6 @@
         "dnsLabelPrefix":{
             "type": "string"
         },
-        "clusterName": {
-            "type": "string"
-        },
-		"nodeGroupName": {
-			"type": "string"
-        },
-        "coreGroupName": {
-			"type": "string"
-        },
-        "dmgrHostName": {
-			"type": "string"
-        },
-        "dmgrPort": {
-			"type": "string"
-        },
-        "vNetName": {
-            "type": "string"
-		},
-        "subnetName": {
-            "type": "string"
-		},
         "vmSize": {
             "type": "string",
             "defaultValue": "Standard_D2_v3"
@@ -73,6 +52,27 @@
         "installKitUri": {
             "type": "string"
         },
+        "clusterName": {
+            "type": "string"
+        },
+		"nodeGroupName": {
+			"type": "string"
+        },
+        "coreGroupName": {
+			"type": "string"
+        },
+        "dmgrHostName": {
+			"type": "string"
+        },
+        "dmgrPort": {
+			"type": "string"
+        },
+        "vNetName": {
+            "type": "string"
+		},
+        "subnetName": {
+            "type": "string"
+		},
         "guidValue": {
             "type": "string",
             "defaultValue": "[newGuid()]"
