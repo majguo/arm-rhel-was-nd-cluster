@@ -39,7 +39,7 @@
             {
                 "name": "dmgrVMPrefix",
                 "type": "Microsoft.Common.TextBox",
-                "label": "Deployment Manager Server Prefix",
+                "label": "Deployment manager server prefix",
                 "toolTip": "The string to prepend to the name of the deployment manager server.",
                 "defaultValue": "dmgr",
                 "constraints": {
@@ -51,7 +51,7 @@
             {
                 "name": "managedVMPrefix",
                 "type": "Microsoft.Common.TextBox",
-                "label": "Managed Server Prefix",
+                "label": "Managed server prefix",
                 "toolTip": "The string to prepend to the name of the managed server.",
                 "defaultValue": "managed",
                 "constraints": {
@@ -63,7 +63,7 @@
             {
                 "name": "dnsLabelPrefix",
                 "type": "Microsoft.Common.TextBox",
-                "label": "DNS Label Prefix",
+                "label": "DNS label prefix",
                 "toolTip": "The string to prepend to the DNS label.",
                 "defaultValue": "wasndcluster",
                 "constraints": {
@@ -76,12 +76,12 @@
         "steps": [
             {
                 "name": "VirtualMachineConfig",
-                "label": "Virtual Machine Settings",
+                "label": "Virtual machine settings",
                 "subLabel": {
                     "preValidation": "Configure the resources and settings of the virtual machine that installs IBM WebSphere.",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Virtual Machine Settings",
+                "bladeTitle": "Virtual machine settings",
                 "elements": [
                     {
                         "name": "vmSizeSelect",
@@ -102,22 +102,22 @@
             },
             {
                 "name": "Prerequisites",
-                "label": "Prerequisites for WebSphere Creation",
+                "label": "Prerequisites for WebSphere creation",
                 "subLabel": {
-                    "preValidation": "Provide Prerequisites Required for WebSphere Creation",
+                    "preValidation": "Provide prerequisites required for WebSphere creation",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Prerequisites for WebSphere Creation",
+                "bladeTitle": "Prerequisites for WebSphere creation",
                 "elements": [
                     {
                         "name": "Credentials",
                         "type": "Microsoft.Common.Section",
-                        "label": "Credentials for WebSphere Creation",
+                        "label": "Credentials for WebSphere creation",
                         "elements": [
                             {
                                 "name": "IBMidUsername",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "IBMid Username",
+                                "label": "IBMid username",
                                 "toolTip": "The username of a pre-existing IBMid.",
                                 "constraints": {
                                     "required": true,
@@ -207,8 +207,8 @@
                             {
                                 "name": "uri",
                                 "type": "Microsoft.Common.TextBox",
-                                "toolTip": "You can download it from IBM web site with your IBMid account, upload to Azure Storage and make it available by generating SAS.",
-                                "label": "The Uri to the accessible IBM Installation Manager Installation Kit V1.9",
+                                "toolTip": "You can firstly download the installation kit from IBM web site with your IBMid, then upload to Azure Storage and make it available by generating SAS token and URL.",
+                                "label": "The URL to download IBM Installation Manager Installation Kit V1.9",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(https?:\/\/)?([\\w-])+\\.([a-zA-Z]{2,63})([\/\\w-]*)*\/?\\??([^#\n\r]*)?#?([^\n\r]*)?$",
@@ -221,12 +221,12 @@
             },
             {
                 "name": "DB2ServerConnectionConfig",
-                "label": "IBM DB2 Server Connection Settings",
+                "label": "IBM DB2 Server connection settings",
                 "subLabel": {
                     "preValidation": "Configure the connection to IBM DB2 Server.",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "IBM DB2 Server Connection Settings",
+                "bladeTitle": "IBM DB2 Server connection settings",
                 "elements": [
                     {
                         "name": "connectToDB2Server",
@@ -251,7 +251,7 @@
                     {
                         "name": "connectionInfo",
                         "type": "Microsoft.Common.Section",
-                        "label": "Connection Settings",
+                        "label": "Connection settings",
                         "elements": [
                             {
                                 "name": "db2ServerName",
