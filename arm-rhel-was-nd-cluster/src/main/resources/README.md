@@ -135,7 +135,7 @@
 ### New plan
 
 - Plan ID
-  - wasndt9-n-cluster
+  - wasndt9a-n-cluster
 - Plan name
   - Create cluster with specified number of nodes
 
