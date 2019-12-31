@@ -353,10 +353,14 @@
         }     
     ],
     "outputs": {
-        "adminSecuredConsole": {
-			"type": "string",
-			"value": "[concat('https://',reference(concat(variables('dmgrVMName'), '-ip')).dnsSettings.fqdn,':9043/ibm/console')]"
-		},
+        "resourceGroupName": {
+            "type": "string",
+            "value": "[resourceGroup().name]"
+        },
+        "region": {
+            "type": "string",
+            "value": "[parameters('location')]"
+        },
         "clusterName": {
             "type": "string",
             "value": "MyCluster"
@@ -384,6 +388,10 @@
 		"subnetName": {
 			"type": "string",
 			"value": "[parameters('subnetName')]"
+		},
+        "adminSecuredConsole": {
+			"type": "string",
+			"value": "[concat('https://',reference(concat(variables('dmgrVMName'), '-ip')).dnsSettings.fqdn,':9043/ibm/console')]"
 		}
 	}
 }
