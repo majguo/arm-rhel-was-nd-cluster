@@ -1,6 +1,6 @@
 # What is this stuff?
 
-- This page specifies content required to create a new plan ("Add additional nodes to the exsiting cluster") to an Azure application offer ("IBM WebSphere Server ND Traditional V9.0.5 Cluster"). To view details about how to create Azure application offer, pls check out [this page](https://github.com/majguo/arm-rhel-was-nd-cluster/blob/master/arm-rhel-was-nd-cluster/src/main/resources/README.md)
+- This page specifies content required to create a new plan ("Add additional nodes to the existing cluster") to an Azure application offer ("IBM WebSphere Server ND Traditional V9.0.5 Cluster"). To view details about how to create Azure application offer, pls check out [this page](https://github.com/majguo/arm-rhel-was-nd-cluster/blob/master/arm-rhel-was-nd-cluster/src/main/resources/README.md)
 
 ## Plan overview
 
@@ -9,7 +9,7 @@
 - Plan ID
   - wasndt9-n-cluster-add-node
 - Plan name
-  - Add additional nodes to the exsiting cluster
+  - Add additional nodes to the existing cluster
 
 ### Plan setup
 
@@ -23,7 +23,7 @@
 ### Plan listing
 
 - Name
-  - Add additional nodes to the exsiting cluster
+  - Add additional nodes to the existing cluster
 - Summary
   - Provisions additional nodes and add them to the existing IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Description
