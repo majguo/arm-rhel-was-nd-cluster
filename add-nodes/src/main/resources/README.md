@@ -27,7 +27,7 @@
 - Summary
   - Provisions additional nodes and add them to the existing WebSphere Application Server Cluster
 - Description
-  - Provisions additional nodes on RedHat Enterprise Linux 7.4 and add them to the existing IBM WebSphere Application Server ND Traditional V9.0.5 Cluster 
+  - Provisions additional nodes on RedHat Enterprise Linux 7.4 VMs and add them to the existing IBM WebSphere Application Server ND Traditional V9.0.5 Cluster 
 
 ### Availability
 

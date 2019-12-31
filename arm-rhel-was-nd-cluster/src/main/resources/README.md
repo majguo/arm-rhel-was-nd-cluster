@@ -155,7 +155,7 @@
 - Summary
   - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster
 - Description
-  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4
+  - Provisions an n-node IBM WebSphere Application Server ND Traditional V9.0.5 Cluster on RedHat Enterprise Linux 7.4 VMs
 
 ### Availability
 
