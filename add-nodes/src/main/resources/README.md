@@ -7,7 +7,7 @@
 ### New plan
 
 - Plan ID
-  - wasndt9-n-cluster-add-node
+  - wasndt9a-n-cluster-add-node
 - Plan name
   - Add additional nodes to the existing cluster
 
