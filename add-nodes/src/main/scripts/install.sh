@@ -72,9 +72,11 @@ add_to_cluster() {
     sed -i "s/\${CLUSTER_MEMBER_NAME}/${clusterMemberName}/g" add-to-cluster.py
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f add-to-cluster.py
 
-    # Restart cluster member server
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh ${clusterMemberName}
+    # Start cluster member server
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
+
+    # Restart node agent
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na, 'restart', 'true true')"
     echo "Node ${nodeName} is successfully added to cluster ${clusterName}"
 }
 
