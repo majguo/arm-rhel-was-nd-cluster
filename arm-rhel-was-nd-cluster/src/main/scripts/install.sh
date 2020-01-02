@@ -104,7 +104,7 @@ create_data_source() {
 
     if [ -z "$db2ServerName" ] || [ -z "$db2ServerPortNumber" ] || [ -z "$db2DBName" ] || [ -z "$db2DBUserName" ] || [ -z "$db2DBUserPwd" ]; then
         echo "quit due to DB2 connectoin info is not provided"
-        exit 0
+        return 0
     fi
 
     # Get jython file template & replace placeholder strings with user-input parameters

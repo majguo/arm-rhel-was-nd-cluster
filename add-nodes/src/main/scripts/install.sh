@@ -56,7 +56,7 @@ add_to_cluster() {
     output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.getid('/DynamicCluster:${clusterName}')" 2>&1)
     if echo $output | grep -q "/dynamicclusters/${clusterName}|"; then
         echo "${clusterName} is a dynamic cluster, no further operation is required"
-        exit 0
+        return 0
     fi
 
     output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.getid('/ServerCluster:${clusterName}')" 2>&1)
