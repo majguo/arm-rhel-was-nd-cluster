@@ -10,8 +10,6 @@ AdminNodeManagement.syncActiveNodes()
 # Start server
 AdminControl.startServer('${CLUSTER_MEMBER_NAME}', '${NODE_NAME}')
 
-# Restart node agent & server
+# Restart node agent
 na = AdminControl.queryNames('type=NodeAgent,node=${NODE_NAME},*')
 AdminControl.invoke(na, 'restart', 'true true')
-AdminControl.stopServer('${CLUSTER_MEMBER_NAME}', '${NODE_NAME}')
-AdminControl.startServer('${CLUSTER_MEMBER_NAME}', '${NODE_NAME}')
