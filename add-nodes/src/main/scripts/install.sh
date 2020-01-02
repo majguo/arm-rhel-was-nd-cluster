@@ -50,6 +50,7 @@ add_to_cluster() {
     profileName=$1
     nodeName=$2
     clusterName=${3:-MyCluster}
+    clusterMemberName=${clusterName}_${nodeName}
 
     # Validation check 
     output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.getid('/DynamicCluster:${clusterName}')" 2>&1)
@@ -68,10 +69,11 @@ add_to_cluster() {
     cp add-to-cluster.py add-to-cluster.py.bak
     sed -i "s/\${NODE_NAME}/${nodeName}/g" add-to-cluster.py
     sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" add-to-cluster.py
+    sed -i "s/\${CLUSTER_MEMBER_NAME}/${clusterMemberName}/g" add-to-cluster.py
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f add-to-cluster.py
    
     # Start cluster member server
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh server_${nodeName}
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
     echo "Node ${nodeName} is successfully added to cluster ${clusterName}"
 }
 
