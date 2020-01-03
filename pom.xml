@@ -6,7 +6,7 @@
     <groupId>com.ibm.websphere.azure</groupId>
     <artifactId>arm-rhel-was-nd-cluster-root</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
     <name>${project.artifactId}</name>
 
     <modules>
