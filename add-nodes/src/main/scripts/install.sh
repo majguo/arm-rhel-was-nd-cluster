@@ -75,11 +75,8 @@ add_to_cluster() {
     # Start application server of cluster member
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
 
-    # Restart node agent & application server of cluster member
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh nodeagent
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh nodeagent
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh ${clusterMemberName}
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
+    # Restart node agent
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
     echo "Node ${nodeName} is successfully added to cluster ${clusterName}"
 }
 
