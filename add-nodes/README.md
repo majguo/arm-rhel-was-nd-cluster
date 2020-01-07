@@ -9,7 +9,7 @@
  - Install Maven
 
  ## Steps of deployment
- 1. Checkout [azure-javaee-iaas](https://github.com/edburns/azure-javaee-iaas)
+ 1. Checkout [azure-javaee-iaas](https://github.com/Azure/azure-javaee-iaas)
     - change to directory hosting the repo project & run `mvn clean install`
  2. Checkout [azure-quickstart-templates](https://github.com/Azure/azure-quickstart-templates) under the specified parent directory
  3. Checkout this repo under the same parent directory and change to directory hosting the repo project
