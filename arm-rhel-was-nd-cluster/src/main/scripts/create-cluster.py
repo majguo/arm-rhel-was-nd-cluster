@@ -6,7 +6,11 @@ cluster = AdminConfig.create('ServerCluster', s1, '[[name ${CLUSTER_NAME}]]')
 nodes = [${NODES_STRING}]
 for node in nodes:
   id = AdminConfig.getid('/Node:%s/' % node)
-  AdminConfig.createClusterMember(cluster, id, [['memberName', '${CLUSTER_NAME}_%s' % node]])
+  clusterMemberName = '${CLUSTER_NAME}_%s' % node
+  AdminConfig.createClusterMember(cluster, id, [['memberName', clusterMemberName]])
+  server = AdminConfig.getid('/Server:%s/' % clusterMemberName)
+  mp = AdminConfig.list('MonitoringPolicy', server)
+  AdminConfig.modify(mp, '[[nodeRestartState PREVIOUS]]')
 AdminConfig.save()
 AdminNodeManagement.syncActiveNodes()
 
