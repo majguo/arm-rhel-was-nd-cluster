@@ -162,7 +162,7 @@ systemctl disable firewalld
 mkdir -p /opt/IBM/InstallationManager/V1.9 && mkdir -p /opt/IBM/WebSphere/ND/V9 && mkdir -p /opt/IBM/IMShared
 
 # Install IBM Installation Manager
-wget -O "$imKitName" "$imKitLocation"
+wget -O "$imKitName" "$imKitLocation" -q
 mkdir im_installer
 unzip -q "$imKitName" -d im_installer
 ./im_installer/userinstc -log log_file -acceptLicense -installationDirectory /opt/IBM/InstallationManager/V1.9
