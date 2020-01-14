@@ -100,9 +100,9 @@
             "type": "string"
         },
         "guidValue": {
-			"defaultValue": "[newGuid()]",
+	    "defaultValue": "[newGuid()]",
             "type": "string"
-		}
+	}
     },
     "variables": {
         "dmgrVMName": "[concat(parameters('dmgrVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
