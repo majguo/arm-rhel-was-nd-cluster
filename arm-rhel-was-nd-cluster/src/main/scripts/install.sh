@@ -165,7 +165,7 @@ copy_db2_drivers() {
     find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
-while getopts "l:u:p:m:c:f:h:r:x:n:t:d:i:s:j:" opt; do
+while getopts "l:u:p:m:c:f:h:r:x:n:t:d:i:s:j:g:o:" opt; do
     case $opt in
         l)
             imKitLocation=$OPTARG #SAS URI of the IBM Installation Manager install kit in Azure Storage
@@ -212,6 +212,12 @@ while getopts "l:u:p:m:c:f:h:r:x:n:t:d:i:s:j:" opt; do
         j)
             db2DSJndiName=$OPTARG #Datasource JNDI name
         ;;
+        g)
+            logStashServerName=$OPTARG #Host name/IP address of LogStash Server
+        ;;
+        o)
+            logStashServerPortNumber=$OPTARG #Port number of LogStash Server
+        ;;
     esac
 done
 
@@ -255,3 +261,6 @@ else
     create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
     copy_db2_drivers
 fi
+
+echo "logStashServerName is ${logStashServerName}"
+echo "logStashServerPortNumber is ${logStashServerPortNumber}"
