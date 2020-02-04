@@ -153,6 +153,48 @@ EOF
     systemctl enable "$logViewerSvcName"
 }
 
+setup_filebeat() {
+    # Parameters
+    outLogPaths=$1 #Log output paths
+    IFS=',' read -r -a array <<< "$outLogPaths"
+    logStashServerName=$2 #Host name/IP address of LogStash Server
+    logStashServerPortNumber=$3 #Port number of LogStash Server
+
+    # Install Filebeat
+    rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    cat <<EOF > /etc/yum.repos.d/elastic.repo
+[elasticsearch-7.x]
+name=Elasticsearch repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF
+    yum install filebeat -y
+
+    # Configure Filebeat
+    mv /etc/filebeat/filebeat.yml /etc/filebeat/filebeat.yml.bak
+    fbConfigFilePath=/etc/filebeat/filebeat.yml
+    echo "filebeat.inputs:" > "$fbConfigFilePath"
+    echo "- type: log" >> "$fbConfigFilePath"
+    echo "  paths:" >> "$fbConfigFilePath"
+    for outLogPath in "${array[@]}"
+    do
+        echo "    - ${outLogPath}" >> "$fbConfigFilePath"
+    done
+    echo "processors:" >> "$fbConfigFilePath"
+    echo "- add_cloud_metadata:" >> "$fbConfigFilePath"
+    echo "output.logstash:" >> "$fbConfigFilePath"
+    echo "  hosts: [\"${logStashServerName}:${logStashServerPortNumber}\"]" >> "$fbConfigFilePath"
+
+    # Enable & start filebeat
+    systemctl daemon-reload
+    systemctl enable filebeat
+    systemctl start filebeat
+}
+
 create_custom_profile() {
     profileName=$1
     dmgrHostName=$2
@@ -287,6 +329,7 @@ if [ "$dmgr" = True ]; then
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/stopServer.sh dmgr
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
     systemctl start was_dmgr_logviewer
+    setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
