@@ -325,11 +325,13 @@ if [ "$dmgr" = True ]; then
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members $dynamic
     create_data_source Dmgr001 MyCluster "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$db2DSJndiName"
-    enable_hpel Dmgr001 Dmgr001Node dmgr /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput.log was_dmgr_logviewer
-    /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/stopServer.sh dmgr
-    /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
-    systemctl start was_dmgr_logviewer
-    setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+    if [ ! -z "$logStashServerName" ] && [ ! -z "$logStashServerPortNumber" ]; then
+        enable_hpel Dmgr001 Dmgr001Node dmgr /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput.log was_dmgr_logviewer
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/stopServer.sh dmgr
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
+        systemctl start was_dmgr_logviewer
+        setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+    fi
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
