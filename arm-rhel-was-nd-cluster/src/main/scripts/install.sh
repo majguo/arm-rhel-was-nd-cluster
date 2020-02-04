@@ -121,8 +121,37 @@ create_data_source() {
     # Create JDBC provider and data source using jython file
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-ds.py
     sleep 60
-    /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -c "AdminNodeManagement.restartActiveNodes()"
+    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminNodeManagement.restartActiveNodes()"
     echo "DB2 JDBC provider and data source are successfully created!"
+}
+
+enable_hpel() {
+    wasProfilePath=/opt/IBM/WebSphere/ND/V9/profiles/$1 #WAS ND profile path
+    nodeName=$2 #Node name
+    wasServerName=$3 #WAS ND server name
+    outLogPath=$4 #Log output path
+    logViewerSvcName=$5 #Name of log viewer service
+
+    # Enable HPEL service
+    cp enable-hpel.template enable-hpel.py
+    sed -i "s/\${WAS_SERVER_NAME}/${wasServerName}/g" enable-hpel.py
+    sed -i "s/\${NODE_NAME}/${nodeName}/g" enable-hpel.py
+    "$wasProfilePath"/bin/wsadmin.sh -lang jython -f enable-hpel.py
+
+# Add systemd unit file for log viewer service
+    cat <<EOF > /etc/systemd/system/${logViewerSvcName}.service
+[Unit]
+Description=IBM WebSphere Application Log Viewer
+[Service]
+Type=simple
+ExecStart=${wasProfilePath}/bin/logViewer.sh -repositoryDir ${wasProfilePath}/logs/${wasServerName} -outLog ${outLogPath} -resumable -resume -format json -monitor
+[Install]
+WantedBy=default.target
+EOF
+
+    # Enable log viewer service
+    systemctl daemon-reload
+    systemctl enable "$logViewerSvcName"
 }
 
 create_custom_profile() {
@@ -255,6 +284,10 @@ if [ "$dmgr" = True ]; then
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members $dynamic
     create_data_source Dmgr001 MyCluster "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$db2DSJndiName"
+    enable_hpel Dmgr001 Dmgr001Node dmgr /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput.log was_dmgr_logviewer
+    /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/stopServer.sh dmgr
+    /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
+    systemctl start was_dmgr_logviewer
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
