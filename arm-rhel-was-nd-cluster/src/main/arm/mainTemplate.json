@@ -367,7 +367,9 @@
                         "[uri(variables('scriptLocation'), concat('create-cluster.py', parameters('_artifactsLocationSasToken')))]",
                         "[uri(variables('scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]",
                         "[uri(variables('scriptLocation'), concat('create-ds.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]"
+                        "[uri(variables('scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('scriptLocation'), concat('get_custom_property.py', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('scriptLocation'), concat('set_custom_property.py', parameters('_artifactsLocationSasToken')))]"
                     ],
                     "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('arguments1'), variables('arguments2'), variables('arguments3'))]"
                 }
