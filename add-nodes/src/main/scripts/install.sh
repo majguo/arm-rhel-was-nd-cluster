@@ -98,7 +98,6 @@ create_systemd_service() {
     echo "SuccessExitStatus=143 0" >> "$srvPath"
     echo "[Install]" >> "$srvPath"
     echo "WantedBy=default.target" >> "$srvPath"
-    chmod a+x "$srvPath"
 
     # Enable service
     systemctl daemon-reload

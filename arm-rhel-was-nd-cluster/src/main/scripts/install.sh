@@ -132,10 +132,10 @@ enable_hpel() {
     logViewerSvcName=$5 #Name of log viewer service
 
     # Enable HPEL service
-    cp enable-hpel.template enable-hpel.py
-    sed -i "s/\${WAS_SERVER_NAME}/${wasServerName}/g" enable-hpel.py
-    sed -i "s/\${NODE_NAME}/${nodeName}/g" enable-hpel.py
-    "$wasProfilePath"/bin/wsadmin.sh -lang jython -f enable-hpel.py
+    cp enable-hpel.template enable-hpel-${wasServerName}.py
+    sed -i "s/\${WAS_SERVER_NAME}/${wasServerName}/g" enable-hpel-${wasServerName}.py
+    sed -i "s/\${NODE_NAME}/${nodeName}/g" enable-hpel-${wasServerName}.py
+    "$wasProfilePath"/bin/wsadmin.sh -lang jython -f enable-hpel-${wasServerName}.py
 
 # Add systemd unit file for log viewer service
     cat <<EOF > /etc/systemd/system/${logViewerSvcName}.service
@@ -249,6 +249,18 @@ elk_logging_ready_check() {
     echo "Ready to setup cluster ELK logging now"
 }
 
+cluster_member_running_state() {
+    profileName=$1
+    serverName=$2
+
+    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/serverStatus.sh ${serverName} 2>&1)
+    if echo $output | grep -q "STARTED"; then
+	    return 0
+    else
+        return 1
+    fi
+}
+
 while getopts "l:u:p:m:c:f:h:r:x:n:t:d:i:s:j:g:o:" opt; do
     case $opt in
         l)
@@ -356,5 +368,33 @@ else
     copy_db2_drivers
     if [ ! -z "$logStashServerName" ] && [ ! -z "$logStashServerPortNumber" ]; then
         elk_logging_ready_check Dmgr001NodeCell Custom
+        
+        cluster_member_running_state Custom MyCluster_$(hostname)Node01
+        running=$?
+        if [ $running -ne 0 ]; then
+	        /opt/IBM/WebSphere/ND/V9/profiles/Custom/bin/startServer.sh MyCluster_$(hostname)Node01
+        fi
+
+        enable_hpel Custom $(hostname)Node01 nodeagent /opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/nodeagent/hpelOutput.log was_na_logviewer
+        enable_hpel Custom $(hostname)Node01 MyCluster_$(hostname)Node01 /opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/MyCluster_$(hostname)Node01/hpelOutput.log was_cm_logviewer
+        
+        /opt/IBM/WebSphere/ND/V9/profiles/Custom/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=$(hostname)Node01,*');AdminControl.invoke(na,'restart','true true')"
+        cluster_member_running_state Custom MyCluster_$(hostname)Node01
+        while [ $? -ne 0 ]
+        do
+            sleep 10
+            echo "Restarting node agent & cluster member..."
+            cluster_member_running_state Custom MyCluster_$(hostname)Node01
+        done
+        echo "Node agent & cluster member are both restarted now"
+
+        systemctl start was_na_logviewer
+        systemctl start was_cm_logviewer
+
+        if [ $running -ne 0 ]; then
+            /opt/IBM/WebSphere/ND/V9/profiles/Custom/bin/stopServer.sh MyCluster_$(hostname)Node01
+        fi
+
+        setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/MyCluster_$(hostname)Node01/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
     fi
 fi
