@@ -354,5 +354,7 @@ else
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
     copy_db2_drivers
-    elk_logging_ready_check Dmgr001NodeCell Custom
+    if [ ! -z "$logStashServerName" ] && [ ! -z "$logStashServerPortNumber" ]; then
+        elk_logging_ready_check Dmgr001NodeCell Custom
+    fi
 fi
