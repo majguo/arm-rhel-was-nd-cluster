@@ -235,6 +235,20 @@ copy_db2_drivers() {
     find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
+elk_logging_ready_check() {
+    cellName=$1
+    profileName=$2
+
+    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} enableClusterELKLogging 2>&1)
+    while echo $output | grep -qv "enableClusterELKLogging:true"
+    do
+        sleep 10
+        echo "Setup cluster ELK logging is not ready, retry it later..."
+        output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} enableClusterELKLogging 2>&1)
+    done
+    echo "Ready to setup cluster ELK logging now"
+}
+
 while getopts "l:u:p:m:c:f:h:r:x:n:t:d:i:s:j:g:o:" opt; do
     case $opt in
         l)
@@ -331,13 +345,14 @@ if [ "$dmgr" = True ]; then
         /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
         systemctl start was_dmgr_logviewer
         setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell logStashServerName "$logStashServerName"
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell logStashServerPortNumber "$logStashServerPortNumber"
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell enableClusterELKLogging true
     fi
 else
     create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
     copy_db2_drivers
+    elk_logging_ready_check Dmgr001NodeCell Custom
 fi
-
-echo "logStashServerName is ${logStashServerName}"
-echo "logStashServerPortNumber is ${logStashServerPortNumber}"
