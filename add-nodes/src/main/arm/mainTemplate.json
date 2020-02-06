@@ -216,7 +216,9 @@
                 "settings": {
                     "fileUris": [
                         "[uri(variables('scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('scriptLocation'), concat('add-to-cluster.py', parameters('_artifactsLocationSasToken')))]"
+                        "[uri(variables('scriptLocation'), concat('add-to-cluster.py', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('scriptLocation'), concat('get_custom_property.py', parameters('_artifactsLocationSasToken')))]"
                     ],
                     "commandToExecute": "[concat('sh install.sh', variables('arguments'))]"
                 }

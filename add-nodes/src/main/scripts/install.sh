@@ -46,17 +46,100 @@ add_admin_credentials_to_soap_client_props() {
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
 }
 
+enable_hpel() {
+    wasProfilePath=/opt/IBM/WebSphere/ND/V9/profiles/$1 #WAS ND profile path
+    nodeName=$2 #Node name
+    wasServerName=$3 #WAS ND server name
+    outLogPath=$4 #Log output path
+    logViewerSvcName=$5 #Name of log viewer service
+
+    # Enable HPEL service
+    cp enable-hpel.template enable-hpel-${wasServerName}.py
+    sed -i "s/\${WAS_SERVER_NAME}/${wasServerName}/g" enable-hpel-${wasServerName}.py
+    sed -i "s/\${NODE_NAME}/${nodeName}/g" enable-hpel-${wasServerName}.py
+    "$wasProfilePath"/bin/wsadmin.sh -lang jython -f enable-hpel-${wasServerName}.py
+
+# Add systemd unit file for log viewer service
+    cat <<EOF > /etc/systemd/system/${logViewerSvcName}.service
+[Unit]
+Description=IBM WebSphere Application Log Viewer
+[Service]
+Type=simple
+ExecStart=${wasProfilePath}/bin/logViewer.sh -repositoryDir ${wasProfilePath}/logs/${wasServerName} -outLog ${outLogPath} -resumable -resume -format json -monitor
+[Install]
+WantedBy=default.target
+EOF
+
+    # Enable log viewer service
+    systemctl daemon-reload
+    systemctl enable "$logViewerSvcName"
+}
+
+setup_filebeat() {
+    # Parameters
+    outLogPaths=$1 #Log output paths
+    IFS=',' read -r -a array <<< "$outLogPaths"
+    logStashServerName=$2 #Host name/IP address of LogStash Server
+    logStashServerPortNumber=$3 #Port number of LogStash Server
+
+    # Install Filebeat
+    rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    cat <<EOF > /etc/yum.repos.d/elastic.repo
+[elasticsearch-7.x]
+name=Elasticsearch repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF
+    yum install filebeat -y
+
+    # Configure Filebeat
+    mv /etc/filebeat/filebeat.yml /etc/filebeat/filebeat.yml.bak
+    fbConfigFilePath=/etc/filebeat/filebeat.yml
+    echo "filebeat.inputs:" > "$fbConfigFilePath"
+    echo "- type: log" >> "$fbConfigFilePath"
+    echo "  paths:" >> "$fbConfigFilePath"
+    for outLogPath in "${array[@]}"
+    do
+        echo "    - ${outLogPath}" >> "$fbConfigFilePath"
+    done
+    echo "processors:" >> "$fbConfigFilePath"
+    echo "- add_cloud_metadata:" >> "$fbConfigFilePath"
+    echo "output.logstash:" >> "$fbConfigFilePath"
+    echo "  hosts: [\"${logStashServerName}:${logStashServerPortNumber}\"]" >> "$fbConfigFilePath"
+
+    # Enable & start filebeat
+    systemctl daemon-reload
+    systemctl enable filebeat
+    systemctl start filebeat
+}
+
+cluster_member_running_state() {
+    profileName=$1
+    serverName=$2
+
+    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/serverStatus.sh ${serverName} 2>&1)
+    if echo $output | grep -q "STARTED"; then
+	    return 0
+    else
+        return 1
+    fi
+}
+
 add_to_cluster() {
     profileName=$1
     nodeName=$2
     clusterName=${3:-MyCluster}
     clusterMemberName=${clusterName}_${nodeName}
 
-    # Validation check 
+    # Validation check
+    dynamic=0
     output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.getid('/DynamicCluster:${clusterName}')" 2>&1)
     if echo $output | grep -q "/dynamicclusters/${clusterName}|"; then
-        echo "${clusterName} is a dynamic cluster, no further operation is required"
-        return 0
+        dynamic=1
     fi
 
     output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminConfig.getid('/ServerCluster:${clusterName}')" 2>&1)
@@ -65,18 +148,50 @@ add_to_cluster() {
         exit 1
     fi
 
-    # Add node to cluster
-    cp add-to-cluster.py add-to-cluster.py.bak
-    sed -i "s/\${NODE_NAME}/${nodeName}/g" add-to-cluster.py
-    sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" add-to-cluster.py
-    sed -i "s/\${CLUSTER_MEMBER_NAME}/${clusterMemberName}/g" add-to-cluster.py
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f add-to-cluster.py
+    if [ $dynamic -eq 0 ]; then
+        # Add node to cluster
+        cp add-to-cluster.py add-to-cluster.py.bak
+        sed -i "s/\${NODE_NAME}/${nodeName}/g" add-to-cluster.py
+        sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" add-to-cluster.py
+        sed -i "s/\${CLUSTER_MEMBER_NAME}/${clusterMemberName}/g" add-to-cluster.py
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f add-to-cluster.py
+    fi
 
-    # Start application server of cluster member
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
+    cellName=$(echo $output | grep -Po "(?<=cells\/)[^\/]*(?=\/.*)")
+    logStashServerName=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerName 2>&1 | grep -Po "(?<=\[logStashServerName\:)[^\]]*(?=\].*)")
+    logStashServerPortNumber=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerPortNumber 2>&1 | grep -Po "(?<=\[logStashServerPortNumber\:)[^\]]*(?=\].*)")
+    if [ $dynamic -eq 0 ] || [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
+        # Start application server of cluster member
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
 
-    # Restart node agent
-    /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
+        if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
+            enable_hpel $profileName $nodeName nodeagent /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput.log was_na_logviewer
+            enable_hpel $profileName $nodeName $clusterMemberName /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput.log was_cm_logviewer
+        fi
+
+        # Restart node agent
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
+    
+        if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
+            cluster_member_running_state $profileName $clusterMemberName
+            while [ $? -ne 0 ]
+            do
+                sleep 10
+                echo "Restarting node agent & cluster member..."
+                cluster_member_running_state $profileName $clusterMemberName
+            done
+            echo "Node agent & cluster member are both restarted now"
+
+            systemctl start was_na_logviewer
+            systemctl start was_cm_logviewer
+
+            if [ $dynamic -eq 1 ]; then
+                /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh $clusterMemberName
+            fi
+            setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+        fi
+    fi
+    
     echo "Node ${nodeName} is successfully added to cluster ${clusterName}"
 }
 
