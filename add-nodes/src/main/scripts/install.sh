@@ -129,6 +129,20 @@ cluster_member_running_state() {
     fi
 }
 
+wait_for_cluster_member_started() {
+    profileName=$1
+    serverName=$2
+
+    cluster_member_running_state $profileName $serverName
+    while [ $? -ne 0 ]
+    do
+        sleep 10
+        echo "Restarting node agent & cluster member..."
+        cluster_member_running_state $profileName $serverName
+    done
+    echo "Node agent & cluster member are both restarted now"
+}
+
 add_to_cluster() {
     profileName=$1
     nodeName=$2
@@ -155,41 +169,35 @@ add_to_cluster() {
         sed -i "s/\${CLUSTER_NAME}/${clusterName}/g" add-to-cluster.py
         sed -i "s/\${CLUSTER_MEMBER_NAME}/${clusterMemberName}/g" add-to-cluster.py
         /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f add-to-cluster.py
+        # Start application server of cluster member
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
+        # Restart all servers running on the node
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
+        wait_for_cluster_member_started $profileName $clusterMemberName
     fi
 
     cellName=$(echo $output | grep -Po "(?<=cells\/)[^\/]*(?=\/.*)")
     logStashServerName=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerName 2>&1 | grep -Po "(?<=\[logStashServerName\:)[^\]]*(?=\].*)")
     logStashServerPortNumber=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerPortNumber 2>&1 | grep -Po "(?<=\[logStashServerPortNumber\:)[^\]]*(?=\].*)")
-    if [ $dynamic -eq 0 ] || [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
-        # Start application server of cluster member
-        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
+    if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
+        if [ $dynamic -eq 1 ]; then
+            /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
+        fi 
 
-        if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
-            enable_hpel $profileName $nodeName nodeagent /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput.log was_na_logviewer
-            enable_hpel $profileName $nodeName $clusterMemberName /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput.log was_cm_logviewer
-        fi
+        enable_hpel $profileName $nodeName nodeagent /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput.log was_na_logviewer
+        enable_hpel $profileName $nodeName $clusterMemberName /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput.log was_cm_logviewer
 
-        # Restart node agent
         /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
-    
-        if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
-            cluster_member_running_state $profileName $clusterMemberName
-            while [ $? -ne 0 ]
-            do
-                sleep 10
-                echo "Restarting node agent & cluster member..."
-                cluster_member_running_state $profileName $clusterMemberName
-            done
-            echo "Node agent & cluster member are both restarted now"
+        wait_for_cluster_member_started $profileName $clusterMemberName
 
-            systemctl start was_na_logviewer
-            systemctl start was_cm_logviewer
+        systemctl start was_na_logviewer
+        systemctl start was_cm_logviewer
 
-            if [ $dynamic -eq 1 ]; then
-                /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh $clusterMemberName
-            fi
-            setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+        if [ $dynamic -eq 1 ]; then
+            /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh $clusterMemberName
         fi
+
+        setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
     fi
     
     echo "Node ${nodeName} is successfully added to cluster ${clusterName}"

@@ -47,6 +47,6 @@ cmpAttrs.append(["authDataAlias", userAlias])
 cmpAttrs.append(["cmpDatasource", newds])
 cf = AdminConfig.create("CMPConnectorFactory", rra, cmpAttrs)
 
-# Save configuratoin changes and restart node agents
+# Save configuratoin changes and sync to active nodes
 AdminConfig.save()
 AdminNodeManagement.syncActiveNodes()

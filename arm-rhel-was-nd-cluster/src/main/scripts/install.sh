@@ -120,6 +120,7 @@ create_data_source() {
     # Create JDBC provider and data source using jython file
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f create-ds.py
     sleep 60
+    # Restart active nodes which will restart all servers running on the nodes
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "AdminNodeManagement.restartActiveNodes()"
     echo "DB2 JDBC provider and data source are successfully created!"
 }
