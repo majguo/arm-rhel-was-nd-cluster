@@ -187,6 +187,8 @@ add_to_cluster() {
 
             if [ $dynamic -eq 1 ]; then
                 /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh $clusterMemberName
+            else
+                /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
             fi
             setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
         fi
