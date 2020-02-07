@@ -176,7 +176,6 @@ add_to_cluster() {
             cluster_member_running_state $profileName $clusterMemberName
             while [ $? -ne 0 ]
             do
-                sleep 10
                 echo "Restarting node agent & cluster member..."
                 cluster_member_running_state $profileName $clusterMemberName
             done
