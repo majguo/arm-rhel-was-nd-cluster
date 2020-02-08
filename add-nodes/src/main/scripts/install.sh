@@ -161,15 +161,13 @@ add_to_cluster() {
     logStashServerName=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerName 2>&1 | grep -Po "(?<=\[logStashServerName\:)[^\]]*(?=\].*)")
     logStashServerPortNumber=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerPortNumber 2>&1 | grep -Po "(?<=\[logStashServerPortNumber\:)[^\]]*(?=\].*)")
     if [ $dynamic -eq 0 ] || [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
-        # Start application server of cluster member
-        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
-
         if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
             enable_hpel $profileName $nodeName nodeagent /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput.log was_na_logviewer
             enable_hpel $profileName $nodeName $clusterMemberName /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput.log was_cm_logviewer
         fi
 
-        # Restart node agent
+        # Start cluster member and then restart all servers running on cluster member node
+        /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
         /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
     
         if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
@@ -183,13 +181,13 @@ add_to_cluster() {
 
             systemctl start was_na_logviewer
             systemctl start was_cm_logviewer
-
+            setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+            
             if [ $dynamic -eq 1 ]; then
                 /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh $clusterMemberName
             else
-                /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
-            fi
-            setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+                shutdown -r 1
+            fi            
         fi
     fi
     
