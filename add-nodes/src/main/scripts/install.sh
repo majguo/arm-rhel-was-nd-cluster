@@ -119,9 +119,10 @@ EOF
 
 cluster_member_running_state() {
     profileName=$1
-    serverName=$2
+    nodeName=$2
+    serverName=$3
 
-    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/serverStatus.sh ${serverName} 2>&1)
+    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "mbean=AdminControl.queryNames('type=Server,node=${nodeName},name=${serverName},*');print 'STARTED' if mbean else 'RESTARTING'" 2>&1)
     if echo $output | grep -q "STARTED"; then
 	    return 0
     else
@@ -171,11 +172,11 @@ add_to_cluster() {
         /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
     
         if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
-            cluster_member_running_state $profileName $clusterMemberName
+            cluster_member_running_state $profileName $nodeName $clusterMemberName
             while [ $? -ne 0 ]
             do
                 echo "Restarting node agent & cluster member..."
-                cluster_member_running_state $profileName $clusterMemberName
+                cluster_member_running_state $profileName $nodeName $clusterMemberName
             done
             echo "Node agent & cluster member are both restarted now"
 
@@ -290,6 +291,6 @@ unzip -q "$imKitName" -d im_installer
 # Add nodes to existing cluster
 add_node Custom $(hostname)Node01 "$adminUserName" "$adminPassword" "$dmgrHostName" "$dmgrPort" "$nodeGroupName" "$coreGroupName"
 add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
-add_to_cluster Custom $(hostname)Node01 "$clusterName"
 create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
 copy_db2_drivers
+add_to_cluster Custom $(hostname)Node01 "$clusterName"
