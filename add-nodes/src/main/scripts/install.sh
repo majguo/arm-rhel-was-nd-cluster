@@ -46,6 +46,38 @@ add_admin_credentials_to_soap_client_props() {
     /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/PropFilePasswordEncoder.sh "$soapClientProps" com.ibm.SOAP.loginPassword
 }
 
+create_systemd_service() {
+    srvName=$1
+    srvDescription=$2
+    profileName=$3
+    serverName=$4
+    srvPath=/etc/systemd/system/${srvName}.service
+
+    # Add systemd unit file
+    echo "[Unit]" > "$srvPath"
+    echo "Description=${srvDescription}" >> "$srvPath"
+    echo "[Service]" >> "$srvPath"
+    echo "Type=forking" >> "$srvPath"
+    echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${serverName}" >> "$srvPath"
+    echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh ${serverName}" >> "$srvPath"
+    echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${serverName}/${serverName}.pid" >> "$srvPath"
+    echo "SuccessExitStatus=143 0" >> "$srvPath"
+    echo "[Install]" >> "$srvPath"
+    echo "WantedBy=default.target" >> "$srvPath"
+
+    # Enable service
+    systemctl daemon-reload
+    systemctl enable "$srvName"
+}
+
+copy_db2_drivers() {
+    wasRootPath=/opt/IBM/WebSphere/ND/V9
+    jdbcDriverPath="$wasRootPath"/db2/java
+
+    mkdir -p "$jdbcDriverPath"
+    find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
+}
+
 enable_hpel() {
     wasProfilePath=/opt/IBM/WebSphere/ND/V9/profiles/$1 #WAS ND profile path
     nodeName=$2 #Node name
@@ -191,38 +223,6 @@ add_to_cluster() {
     fi
     
     echo "Node ${nodeName} is successfully added to cluster ${clusterName}"
-}
-
-create_systemd_service() {
-    srvName=$1
-    srvDescription=$2
-    profileName=$3
-    serverName=$4
-    srvPath=/etc/systemd/system/${srvName}.service
-
-    # Add systemd unit file
-    echo "[Unit]" > "$srvPath"
-    echo "Description=${srvDescription}" >> "$srvPath"
-    echo "[Service]" >> "$srvPath"
-    echo "Type=forking" >> "$srvPath"
-    echo "ExecStart=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${serverName}" >> "$srvPath"
-    echo "ExecStop=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh ${serverName}" >> "$srvPath"
-    echo "PIDFile=/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${serverName}/${serverName}.pid" >> "$srvPath"
-    echo "SuccessExitStatus=143 0" >> "$srvPath"
-    echo "[Install]" >> "$srvPath"
-    echo "WantedBy=default.target" >> "$srvPath"
-
-    # Enable service
-    systemctl daemon-reload
-    systemctl enable "$srvName"
-}
-
-copy_db2_drivers() {
-    wasRootPath=/opt/IBM/WebSphere/ND/V9
-    jdbcDriverPath="$wasRootPath"/db2/java
-
-    mkdir -p "$jdbcDriverPath"
-    find "$wasRootPath" -name "db2jcc*.jar" | xargs -I{} cp {} "$jdbcDriverPath"
 }
 
 while getopts "l:u:p:m:c:s:d:r:h:o:" opt; do
