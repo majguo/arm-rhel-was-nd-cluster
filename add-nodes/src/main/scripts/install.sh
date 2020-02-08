@@ -186,8 +186,6 @@ add_to_cluster() {
             
             if [ $dynamic -eq 1 ]; then
                 /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh $clusterMemberName
-            else
-                shutdown -r 1
             fi            
         fi
     fi
