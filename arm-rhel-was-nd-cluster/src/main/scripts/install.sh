@@ -252,9 +252,10 @@ elk_logging_ready_check() {
 
 cluster_member_running_state() {
     profileName=$1
-    serverName=$2
+    nodeName=$2
+    serverName=$3
 
-    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/serverStatus.sh ${serverName} 2>&1)
+    output=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "mbean=AdminControl.queryNames('type=Server,node=${nodeName},name=${serverName},*');print 'STARTED' if mbean else 'RESTARTING'" 2>&1)
     if echo $output | grep -q "STARTED"; then
 	    return 0
     else
@@ -370,7 +371,7 @@ else
     if [ ! -z "$logStashServerName" ] && [ ! -z "$logStashServerPortNumber" ]; then
         elk_logging_ready_check Dmgr001NodeCell Custom
         
-        cluster_member_running_state Custom MyCluster_$(hostname)Node01
+        cluster_member_running_state Custom $(hostname)Node01 MyCluster_$(hostname)Node01
         running=$?
         if [ $running -ne 0 ]; then
 	        /opt/IBM/WebSphere/ND/V9/profiles/Custom/bin/startServer.sh MyCluster_$(hostname)Node01
@@ -380,11 +381,11 @@ else
         enable_hpel Custom $(hostname)Node01 MyCluster_$(hostname)Node01 /opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/MyCluster_$(hostname)Node01/hpelOutput.log was_cm_logviewer
         
         /opt/IBM/WebSphere/ND/V9/profiles/Custom/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=$(hostname)Node01,*');AdminControl.invoke(na,'restart','true true')"
-        cluster_member_running_state Custom MyCluster_$(hostname)Node01
+        cluster_member_running_state Custom $(hostname)Node01 MyCluster_$(hostname)Node01
         while [ $? -ne 0 ]
         do
             echo "Restarting node agent & cluster member..."
-            cluster_member_running_state Custom MyCluster_$(hostname)Node01
+            cluster_member_running_state Custom $(hostname)Node01 MyCluster_$(hostname)Node01
         done
         echo "Node agent & cluster member are both restarted now"
 
