@@ -383,7 +383,6 @@ else
         cluster_member_running_state Custom MyCluster_$(hostname)Node01
         while [ $? -ne 0 ]
         do
-            sleep 10
             echo "Restarting node agent & cluster member..."
             cluster_member_running_state Custom MyCluster_$(hostname)Node01
         done
