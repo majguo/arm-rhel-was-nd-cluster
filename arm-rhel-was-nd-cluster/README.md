@@ -15,13 +15,22 @@
  3. Checkout this repo under the same parent directory and change to directory hosting the repo project
  4. Change to sub-directory `arm-rhel-was-nd-cluster`
  5. Build the project by replacing all placeholder `${<place_holder>}` with valid values
-    - if you want to connect DB2 Server to your WebSphere server cluster, provide valid DNS name/IP address, port number, database name, user name & password of a running & accessible DB2 server for parameters `db2ServerName`, `db2ServerPortNumber`, `db2DBName`, `db2DBUserName` & `db2DBUserPwd`
+    - set `-Ddynamic=false` to create static cluster, and set `-Ddynamic=true` to create dynamic cluster
+    - connect to DB2 Server & Elastic Stack for static/dynamic 
       ```
-      mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -DconnectToDB2Server=true -Ddb2ServerName=<db2ServerName> -Ddb2ServerPortNumber=<db2ServerPortNumber> -Ddb2DBName=<db2DBName> -Ddb2DBUserName=<db2DBUserName> -Ddb2DBUserPwd=<db2DBUserPwd> -Ddb2DSJndiName=<db2DSJndiName> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
+      mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -DconnectToDB2Server=true -Ddb2ServerName=<db2ServerName> -Ddb2ServerPortNumber=<db2ServerPortNumber> -Ddb2DBName=<db2DBName> -Ddb2DBUserName=<db2DBUserName> -Ddb2DBUserPwd=<db2DBUserPwd> -Ddb2DSJndiName=<db2DSJndiName> -DconnectToELK=true -DlogStashServerName=<logStashServerName> -DlogStashServerPortNumber=<logStashServerPortNumber> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
       ```
-    - otherwise
+    - connect to DB2 Server only
       ```
-      mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -DconnectToDB2Server=false -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
+      mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -DconnectToDB2Server=true -Ddb2ServerName=<db2ServerName> -Ddb2ServerPortNumber=<db2ServerPortNumber> -Ddb2DBName=<db2DBName> -Ddb2DBUserName=<db2DBUserName> -Ddb2DBUserPwd=<db2DBUserPwd> -Ddb2DSJndiName=<db2DSJndiName> -DconnectToELK=false -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
+      ```
+    - connect to Elastic Stack only 
+      ```
+      mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -DconnectToDB2Server=false -DconnectToELK=true -DlogStashServerName=<logStashServerName> -DlogStashServerPortNumber=<logStashServerPortNumber> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
+      ```
+    - connect to neither DB2 Server nor Elastic Stack 
+      ```
+      mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -DconnectToDB2Server=false -DconnectToELK=false -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
       ```
  6. Change to `./target/arm` directory
  7. Using `deploy.azcli` to deploy
