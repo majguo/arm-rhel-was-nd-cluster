@@ -198,10 +198,12 @@ EOF
 
 create_custom_profile() {
     profileName=$1
-    dmgrHostName=$2
-    dmgrPort=$3
-    dmgrAdminUserName=$4
-    dmgrAdminPassword=$5
+    hostName=$2
+    nodeName=$3
+    dmgrHostName=$4
+    dmgrPort=$5
+    dmgrAdminUserName=$6
+    dmgrAdminPassword=$7
     
     curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
     while [ $? -ne 0 ]
@@ -213,7 +215,7 @@ create_custom_profile() {
     sleep 60
     echo "dmgr is ready to add nodes"
 
-    output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
+    output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName -hostName $hostName -nodeName $nodeName \
         -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
         -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
     while echo $output | grep -qv "SUCCESS"
@@ -221,7 +223,7 @@ create_custom_profile() {
         sleep 10
         echo "adding node failed, retry it later..."
         rm -rf /opt/IBM/WebSphere/ND/V9/profiles/$profileName
-        output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName \
+        output=$(/opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName -hostName $hostName -nodeName $nodeName \
             -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed \
             -dmgrHost $dmgrHostName -dmgrPort $dmgrPort -dmgrAdminUserName $dmgrAdminUserName -dmgrAdminPassword $dmgrAdminPassword 2>&1)
     done
@@ -364,7 +366,7 @@ if [ "$dmgr" = True ]; then
         /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell enableClusterELKLogging true
     fi
 else
-    create_custom_profile Custom $dmgrHostName 8879 "$adminUserName" "$adminPassword"
+    create_custom_profile Custom $(hostname) $(hostname)Node01 $dmgrHostName 8879 "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
     copy_db2_drivers

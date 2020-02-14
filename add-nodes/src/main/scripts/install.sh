@@ -2,13 +2,14 @@
 
 add_node() {
     profileName=$1
-    nodeName=$2
-    userName=$3
-    password=$4    
-    dmgrHostName=$5
-    dmgrPort=${6:-8879}
-    nodeGroupName=${7:-DefaultNodeGroup}
-    coreGroupName=${8:-DefaultCoreGroup}
+    hostName=$2
+    nodeName=$3
+    userName=$4
+    password=$5    
+    dmgrHostName=$6
+    dmgrPort=${7:-8879}
+    nodeGroupName=${8:-DefaultNodeGroup}
+    coreGroupName=${9:-DefaultCoreGroup}
     
     curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
     if [ $? -ne 0 ]; then
@@ -17,7 +18,7 @@ add_node() {
     fi
     echo "dmgr is ready to add nodes"
 
-    /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName -nodeName $nodeName \
+    /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName $profileName -hostName $hostName -nodeName $nodeName \
         -profilePath /opt/IBM/WebSphere/ND/V9/profiles/$profileName -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/managed
     output=$(/opt/IBM/WebSphere/ND/V9/bin/addNode.sh $dmgrHostName $dmgrPort -username $userName -password $password \
         -nodegroupname "$nodeGroupName" -coregroupname "$coreGroupName" -profileName $profileName 2>&1)
@@ -287,7 +288,7 @@ unzip -q "$imKitName" -d im_installer
     -secureStorageFile storage_file -acceptLicense -showProgress
 
 # Add nodes to existing cluster
-add_node Custom $(hostname)Node01 "$adminUserName" "$adminPassword" "$dmgrHostName" "$dmgrPort" "$nodeGroupName" "$coreGroupName"
+add_node Custom $(hostname) $(hostname)Node01 "$adminUserName" "$adminPassword" "$dmgrHostName" "$dmgrPort" "$nodeGroupName" "$coreGroupName"
 add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
 create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
 copy_db2_drivers
