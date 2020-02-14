@@ -2,12 +2,13 @@
 
 create_dmgr_profile() {
     profileName=$1
-    nodeName=$2
-    cellName=$3
-    adminUserName=$4
-    adminPassword=$5
+    hostName=$2
+    nodeName=$3
+    cellName=$4
+    adminUserName=$5
+    adminPassword=$6
 
-    /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName ${profileName} \
+    /opt/IBM/WebSphere/ND/V9/bin/manageprofiles.sh -create -profileName ${profileName} -hostName $hostName \
         -templatePath /opt/IBM/WebSphere/ND/V9/profileTemplates/management -serverType DEPLOYMENT_MANAGER \
         -nodeName ${nodeName} -cellName ${cellName} -enableAdminSecurity true -adminUserName ${adminUserName} -adminPassword ${adminPassword}
 }
@@ -349,7 +350,7 @@ unzip -q "$imKitName" -d im_installer
 
 # Create cluster by creating deployment manager, node agent & add nodes to be managed
 if [ "$dmgr" = True ]; then
-    create_dmgr_profile Dmgr001 Dmgr001Node Dmgr001NodeCell "$adminUserName" "$adminPassword"
+    create_dmgr_profile Dmgr001 $(hostname) Dmgr001Node Dmgr001NodeCell "$adminUserName" "$adminPassword"
     add_admin_credentials_to_soap_client_props Dmgr001 "$adminUserName" "$adminPassword"
     create_systemd_service was_dmgr "IBM WebSphere Application Server ND Deployment Manager" Dmgr001 dmgr
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
