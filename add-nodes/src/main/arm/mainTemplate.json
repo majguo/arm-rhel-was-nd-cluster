@@ -31,12 +31,6 @@
             "type": "string",
             "defaultValue": "StandardSSD_LRS"
         },
-        "ibmUserId": {
-            "type": "string"
-        },
-        "ibmUserPwd": {
-            "type": "securestring"
-        },
         "vmAdminId": {
             "type": "string"
         },
@@ -48,9 +42,6 @@
         },
         "adminPwd": {
             "type": "securestring"
-        },
-        "installKitUri": {
-            "type": "string"
         },
         "clusterName": {
             "type": "string"
@@ -83,7 +74,7 @@
         "dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]",
         "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
-        "arguments": "[concat(' -l \"',parameters('installKitUri'),'\" -u ',parameters('ibmUserId'),' -p ',parameters('ibmUserPwd'),' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -s ',parameters('clusterName'),' -d ',parameters('nodeGroupName'),' -r ',parameters('coreGroupName'),' -h ',parameters('dmgrHostName'),' -o ',parameters('dmgrPort'))]"
+        "arguments": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -s ',parameters('clusterName'),' -d ',parameters('nodeGroupName'),' -r ',parameters('coreGroupName'),' -h ',parameters('dmgrHostName'),' -o ',parameters('dmgrPort'))]"
     },
     "resources": [
         {
@@ -169,10 +160,10 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "RedHat",
-                        "offer": "RHEL",
-                        "sku": "7.4",
-                        "version": "latest"
+                        "publisher": "microsoft_javaeeonazure_test",
+                        "offer": "rhel74-was-jdk-preview",
+                        "sku": "905",
+                        "version": "9.0.5"
                     },
                     "osDisk": {
                         "name": "[concat(variables('managedVMPrefix'), copyIndex(1), '-disk')]",
@@ -194,6 +185,11 @@
                         }
                     ]
                 }
+            },
+            "plan": {
+                "name": "905",
+                "publisher": "microsoft_javaeeonazure_test",
+                "product": "rhel74-was-jdk-preview"
             }
         },
         {

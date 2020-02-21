@@ -14,12 +14,6 @@
         "dnsLabelPrefix":{
             "value": "${dnsLabelPrefix}"
         },
-        "ibmUserId": {
-            "value": "${ibmUserId}"
-        },
-        "ibmUserPwd": {
-            "value": "${ibmUserPwd}"
-        },
         "vmAdminId": {
             "value": "${vmAdminId}"
         },
