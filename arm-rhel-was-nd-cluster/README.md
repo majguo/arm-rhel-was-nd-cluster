@@ -34,7 +34,7 @@
  6. Change to `./target/arm` directory
  7. Using `deploy.azcli` to deploy
     ```
-    ./deploy.azcli -n <deploymentName> -f <installKitFile> -i <subscriptionId> -g <resourceGroupName> -l <resourceGroupLocation>
+    ./deploy.azcli -n <deploymentName> -i <subscriptionId> -g <resourceGroupName> -l <resourceGroupLocation>
     ```
 
 ## After deployment
