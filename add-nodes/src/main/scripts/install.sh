@@ -112,8 +112,9 @@ setup_filebeat() {
     # Parameters
     outLogPaths=$1 #Log output paths
     IFS=',' read -r -a array <<< "$outLogPaths"
-    logStashServerName=$2 #Host name/IP address of LogStash Server
-    logStashServerPortNumber=$3 #Port number of LogStash Server
+    cloudId=$2 #Cloud ID of Elasticsearch Service on Elastic Cloud
+    cloudAuthUser=$3 #User name of Elasticsearch Service on Elastic Cloud
+    cloudAuthPwd=$4 #Password of Elasticsearch Service on Elastic Cloud
 
     # Install Filebeat
     rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
@@ -139,10 +140,13 @@ EOF
     do
         echo "    - ${outLogPath}" >> "$fbConfigFilePath"
     done
+    echo "  json.message_key: ibm_datetime" >> "$fbConfigFilePath"
+    echo "  json.keys_under_root: true" >> "$fbConfigFilePath"
+    echo "  json.add_error_key: true" >> "$fbConfigFilePath"
     echo "processors:" >> "$fbConfigFilePath"
-    echo "- add_cloud_metadata:" >> "$fbConfigFilePath"
-    echo "output.logstash:" >> "$fbConfigFilePath"
-    echo "  hosts: [\"${logStashServerName}:${logStashServerPortNumber}\"]" >> "$fbConfigFilePath"
+    echo "- add_cloud_metadata: ~" >> "$fbConfigFilePath"
+    echo "cloud.id: ${cloudId}" >> "$fbConfigFilePath"
+    echo "cloud.auth: ${cloudAuthUser}:${cloudAuthPwd}" >> "$fbConfigFilePath"
 
     # Enable & start filebeat
     systemctl daemon-reload
@@ -192,10 +196,11 @@ add_to_cluster() {
     fi
 
     cellName=$(echo $output | grep -Po "(?<=cells\/)[^\/]*(?=\/.*)")
-    logStashServerName=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerName 2>&1 | grep -Po "(?<=\[logStashServerName\:)[^\]]*(?=\].*)")
-    logStashServerPortNumber=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} logStashServerPortNumber 2>&1 | grep -Po "(?<=\[logStashServerPortNumber\:)[^\]]*(?=\].*)")
-    if [ $dynamic -eq 0 ] || [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
-        if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
+    cloudId=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} cloudId 2>&1 | grep -Po "(?<=\[cloudId\:)[^\]]*(?=\].*)")
+    cloudAuthUser=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} cloudAuthUser 2>&1 | grep -Po "(?<=\[cloudAuthUser\:)[^\]]*(?=\].*)")
+    cloudAuthPwd=$(/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -f get_custom_property.py ${cellName} cloudAuthPwd 2>&1 | grep -Po "(?<=\[cloudAuthPwd\:)[^\]]*(?=\].*)")
+    if { [ "$cloudId" != None ] && [ "$cloudAuthUser" != None ] && [ "$cloudAuthPwd" != None ]; } || [ "$dynamic" -eq 0 ]; then
+        if [ "$cloudId" != None ] && [ "$cloudAuthUser" != None ] && [ "$cloudAuthPwd" != None ]; then
             enable_hpel $profileName $nodeName nodeagent /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput.log was_na_logviewer
             enable_hpel $profileName $nodeName $clusterMemberName /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput.log was_cm_logviewer
         fi
@@ -204,7 +209,7 @@ add_to_cluster() {
         /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/startServer.sh ${clusterMemberName}
         /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/wsadmin.sh -lang jython -c "na=AdminControl.queryNames('type=NodeAgent,node=${nodeName},*');AdminControl.invoke(na,'restart','true true')"
     
-        if [ $logStashServerName != None -a $logStashServerPortNumber != None ]; then
+        if [ "$cloudId" != None ] && [ "$cloudAuthUser" != None ] && [ "$cloudAuthPwd" != None ]; then
             cluster_member_running_state $profileName $nodeName $clusterMemberName
             while [ $? -ne 0 ]
             do
@@ -215,7 +220,7 @@ add_to_cluster() {
 
             systemctl start was_na_logviewer
             systemctl start was_cm_logviewer
-            setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+            setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/${profileName}/logs/${clusterMemberName}/hpelOutput*.log" "$cloudId" "$cloudAuthUser" "$cloudAuthPwd"
             
             if [ $dynamic -eq 1 ]; then
                 /opt/IBM/WebSphere/ND/V9/profiles/${profileName}/bin/stopServer.sh $clusterMemberName

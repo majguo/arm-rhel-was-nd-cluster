@@ -159,8 +159,9 @@ setup_filebeat() {
     # Parameters
     outLogPaths=$1 #Log output paths
     IFS=',' read -r -a array <<< "$outLogPaths"
-    logStashServerName=$2 #Host name/IP address of LogStash Server
-    logStashServerPortNumber=$3 #Port number of LogStash Server
+    cloudId=$2 #Cloud ID of Elasticsearch Service on Elastic Cloud
+    cloudAuthUser=$3 #User name of Elasticsearch Service on Elastic Cloud
+    cloudAuthPwd=$4 #Password of Elasticsearch Service on Elastic Cloud
 
     # Install Filebeat
     rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
@@ -186,10 +187,13 @@ EOF
     do
         echo "    - ${outLogPath}" >> "$fbConfigFilePath"
     done
+    echo "  json.message_key: ibm_datetime" >> "$fbConfigFilePath"
+    echo "  json.keys_under_root: true" >> "$fbConfigFilePath"
+    echo "  json.add_error_key: true" >> "$fbConfigFilePath"
     echo "processors:" >> "$fbConfigFilePath"
-    echo "- add_cloud_metadata:" >> "$fbConfigFilePath"
-    echo "output.logstash:" >> "$fbConfigFilePath"
-    echo "  hosts: [\"${logStashServerName}:${logStashServerPortNumber}\"]" >> "$fbConfigFilePath"
+    echo "- add_cloud_metadata: ~" >> "$fbConfigFilePath"
+    echo "cloud.id: ${cloudId}" >> "$fbConfigFilePath"
+    echo "cloud.auth: ${cloudAuthUser}:${cloudAuthPwd}" >> "$fbConfigFilePath"
 
     # Enable & start filebeat
     systemctl daemon-reload
@@ -266,7 +270,7 @@ cluster_member_running_state() {
     fi
 }
 
-while getopts "m:c:f:h:r:x:n:t:d:i:s:j:g:o:" opt; do
+while getopts "m:c:f:h:r:x:n:t:d:i:s:j:g:o:k:" opt; do
     case $opt in
         m)
             adminUserName=$OPTARG #User id for admimistrating WebSphere Admin Console
@@ -305,10 +309,13 @@ while getopts "m:c:f:h:r:x:n:t:d:i:s:j:g:o:" opt; do
             db2DSJndiName=$OPTARG #Datasource JNDI name
         ;;
         g)
-            logStashServerName=$OPTARG #Host name/IP address of LogStash Server
+            cloudId=$OPTARG #Cloud ID of Elasticsearch Service on Elastic Cloud
         ;;
         o)
-            logStashServerPortNumber=$OPTARG #Port number of LogStash Server
+            cloudAuthUser=$OPTARG #User name of Elasticsearch Service on Elastic Cloud
+        ;;
+        k)
+            cloudAuthPwd=$OPTARG #Password of Elasticsearch Service on Elastic Cloud
         ;;
     esac
 done
@@ -325,14 +332,15 @@ if [ "$dmgr" = True ]; then
     /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
     create_cluster Dmgr001 Dmgr001Node Dmgr001NodeCell MyCluster $members $dynamic
     create_data_source Dmgr001 MyCluster "$db2ServerName" "$db2ServerPortNumber" "$db2DBName" "$db2DBUserName" "$db2DBUserPwd" "$db2DSJndiName"
-    if [ ! -z "$logStashServerName" ] && [ ! -z "$logStashServerPortNumber" ]; then
+    if [ ! -z "$cloudId" ] && [ ! -z "$cloudAuthUser" ] && [ ! -z "$cloudAuthPwd" ]; then
         enable_hpel Dmgr001 Dmgr001Node dmgr /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput.log was_dmgr_logviewer
         /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/stopServer.sh dmgr
         /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/startServer.sh dmgr
         systemctl start was_dmgr_logviewer
-        setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
-        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell logStashServerName "$logStashServerName"
-        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell logStashServerPortNumber "$logStashServerPortNumber"
+        setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/logs/dmgr/hpelOutput*.log" "$cloudId" "$cloudAuthUser" "$cloudAuthPwd"
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell cloudId "$cloudId"
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell cloudAuthUser "$cloudAuthUser"
+        /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell cloudAuthPwd "$cloudAuthPwd"
         /opt/IBM/WebSphere/ND/V9/profiles/Dmgr001/bin/wsadmin.sh -lang jython -f set_custom_property.py Dmgr001NodeCell enableClusterELKLogging true
     fi
 else
@@ -340,7 +348,7 @@ else
     add_admin_credentials_to_soap_client_props Custom "$adminUserName" "$adminPassword"
     create_systemd_service was_nodeagent "IBM WebSphere Application Server ND Node Agent" Custom nodeagent
     copy_db2_drivers
-    if [ ! -z "$logStashServerName" ] && [ ! -z "$logStashServerPortNumber" ]; then
+    if [ ! -z "$cloudId" ] && [ ! -z "$cloudAuthUser" ] && [ ! -z "$cloudAuthPwd" ]; then
         elk_logging_ready_check Dmgr001NodeCell Custom
         
         cluster_member_running_state Custom $(hostname)Node01 MyCluster_$(hostname)Node01
@@ -368,6 +376,6 @@ else
             /opt/IBM/WebSphere/ND/V9/profiles/Custom/bin/stopServer.sh MyCluster_$(hostname)Node01
         fi
 
-        setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/MyCluster_$(hostname)Node01/hpelOutput*.log" "$logStashServerName" "$logStashServerPortNumber"
+        setup_filebeat "/opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/nodeagent/hpelOutput*.log,/opt/IBM/WebSphere/ND/V9/profiles/Custom/logs/MyCluster_$(hostname)Node01/hpelOutput*.log" "$cloudId" "$cloudAuthUser" "$cloudAuthPwd"
     fi
 fi
