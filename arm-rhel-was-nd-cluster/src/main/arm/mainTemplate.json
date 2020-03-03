@@ -162,7 +162,7 @@
             "properties": {
                 "securityRules": [
                     {
-                        "name": "HTTP",
+                        "name": "TCP",
                         "properties": {
                             "protocol": "TCP",
                             "sourcePortRange": "*",
@@ -173,37 +173,10 @@
                             "direction": "Inbound",
                             "destinationPortRanges": [
                                 "9060",
-                                "9080"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "HTTPS",
-                        "properties": {
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 320,
-                            "direction": "Inbound",
-                            "destinationPortRanges": [
+                                "9080",
                                 "9043",
                                 "9443"
                             ]
-                        }
-                    },
-                    {
-                        "name": "SSH",
-                        "properties": {
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "22",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 340,
-                            "direction": "Inbound"
                         }
                     }
                 ]
