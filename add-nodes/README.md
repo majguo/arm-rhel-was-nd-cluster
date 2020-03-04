@@ -13,12 +13,12 @@
  2. Checkout [azure-quickstart-templates](https://github.com/Azure/azure-quickstart-templates) under the specified parent directory
  3. Checkout this repo under the same parent directory and change to directory hosting the repo project
  4. Change to sub-directory `add-nodes`
- 5. Build the project by replacing all placeholder `${<place_holder>}` with valid values
+ 5. Build the project by replacing all placeholder `${<place_holder>}` with valid values. You can get valid values of parameters from `outputs` of deployment which was used for creating the initial cluster, including `clusterName`, `nodeGroupName`, `coreGroupName`, `dmgrHostName`, `dmgrPort`, `virtualNetworkName` (mapped to `vNetName`) & `subnetName`.
     ```
     mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -DnumberOfNodes=<numberOfNodes> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -DclusterName=<clusterName> -DnodeGroupName=<nodeGroupName> -DcoreGroupName=<coreGroupName> -DdmgrHostName=<dmgrHostName> -DdmgrPort=<dmgrPort> -DvNetName=<vNetName> -DsubnetName=<subnetName> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
     ```
  6. Change to `./target/arm` directory
- 7. Using `deploy.azcli` to deploy
+ 7. Using `deploy.azcli` to deploy. Similar to step 5, you can get valid values of parameters `resourceGroupName` & `resourceGroupLocation` (mapped from `region`) from `outputs` of deployment which was used for creating the initial cluster.
     ```
     ./deploy.azcli -n <deploymentName> -i <subscriptionId> -g <resourceGroupName> -l <resourceGroupLocation>
     ```
