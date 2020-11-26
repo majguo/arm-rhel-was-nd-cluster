@@ -140,7 +140,7 @@ EOF
     do
         echo "    - ${outLogPath}" >> "$fbConfigFilePath"
     done
-    echo "  json.message_key: ibm_datetime" >> "$fbConfigFilePath"
+    echo "  json.message_key: message" >> "$fbConfigFilePath"
     echo "  json.keys_under_root: true" >> "$fbConfigFilePath"
     echo "  json.add_error_key: true" >> "$fbConfigFilePath"
     echo "processors:" >> "$fbConfigFilePath"
