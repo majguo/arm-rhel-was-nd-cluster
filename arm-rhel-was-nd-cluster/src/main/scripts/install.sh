@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 create_dmgr_profile() {
     profileName=$1
     hostName=$2

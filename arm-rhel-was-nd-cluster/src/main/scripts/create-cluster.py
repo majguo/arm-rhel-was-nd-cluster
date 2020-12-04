@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Create cluster
 s1 = AdminConfig.getid('/Cell:${CELL_NAME}/')
 cluster = AdminConfig.create('ServerCluster', s1, '[[name ${CLUSTER_NAME}]]')

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 def setCustomPropertyOnObject(object_id, propname, propvalue):
     propsidlist = AdminConfig.showAttribute(object_id,'properties')[1:-1].split(' ')
     for id in propsidlist:

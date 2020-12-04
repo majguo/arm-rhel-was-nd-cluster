@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 # Create dynamic cluster
 properties = ('[-membershipPolicy "node_nodegroup = \'${NODE_GROUP_NAME}\'" '
 '-dynamicClusterProperties "[[operationalMode automatic][minInstances 1][maxInstances -1][numVerticalInstances 1][serverInactivityTime 1440]]" '

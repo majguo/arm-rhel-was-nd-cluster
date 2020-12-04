@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
 def getObjectCustomProperty(object_id, propname):
     x = AdminConfig.showAttribute(object_id,'properties')
     if len(x) == 0:
