@@ -117,6 +117,7 @@
         "dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
         "virtualNetworkName": "[concat(variables('dnsLabelPrefix'), '-vnet')]",
         "networkSecurityGroupName": "[concat(variables('dnsLabelPrefix'), '-nsg')]",
+        "publicIPAddressName": "[concat(variables('dmgrVMName'), '-ip')]",
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), parameters('subnetName'))]",
         "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
         "virtualNetworkRef": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -388,7 +389,7 @@
         },
         "adminSecuredConsole": {
             "type": "string",
-            "value": "[concat('https://',reference(concat(variables('dmgrVMName'), '-ip')).dnsSettings.fqdn,':9043/ibm/console')]"
+            "value": "[concat('https://',reference(variables('publicIPAddressName')).dnsSettings.fqdn,':9043/ibm/console')]"
         }
     }
 }
