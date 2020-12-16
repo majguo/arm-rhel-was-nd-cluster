@@ -162,7 +162,9 @@
                         "toolTip": "The name of the existing cluster.",
                         "defaultValue": "MyCluster",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]+$",
+                            "validationMessage": "The value must only contain letters and numbers."
                         }
                     },
                     {
@@ -172,7 +174,9 @@
                         "toolTip": "The name of the existing node group created in deployment manager server.",
                         "defaultValue": "DefaultNodeGroup",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]+$",
+                            "validationMessage": "The value must only contain letters and numbers."
                         }
                     },
                     {
@@ -182,7 +186,9 @@
                         "toolTip": "The name of the existing core group created in deployment manager server.",
                         "defaultValue": "DefaultCoreGroup",
                         "constraints": {
-                            "required": true                                
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]+$",
+                            "validationMessage": "The value must only contain letters and numbers."
                         }
                     },
                     {
@@ -191,7 +197,9 @@
                         "label": "Host name of dmgr server",
                         "toolTip": "The host name of the existing deployment manager server.",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]+$",
+                            "validationMessage": "The value must only contain letters and numbers."
                         }
                     },
                     {
@@ -212,7 +220,9 @@
                         "label": "Virtual network name",
                         "toolTip": "The name of the existing virtual network in the cluster.",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]+$",
+                            "validationMessage": "The value must only contain letters and numbers."
                         }
                     },
                     {
@@ -222,7 +232,9 @@
                         "toolTip": "The subnet name of the virtual network in the cluster.",
                         "defaultValue": "subnet01",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z\\-]+$",
+                            "validationMessage": "The value must only contain letters and numbers."
                         }
                     }
                 ]
