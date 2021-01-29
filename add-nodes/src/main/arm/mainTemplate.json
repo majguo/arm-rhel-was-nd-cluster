@@ -70,11 +70,11 @@
         }
     },
     "variables": {
-        "managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
-        "dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
-        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]",
-        "scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
-        "arguments": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -s ',parameters('clusterName'),' -d ',parameters('nodeGroupName'),' -r ',parameters('coreGroupName'),' -h ',parameters('dmgrHostName'),' -o ',parameters('dmgrPort'))]"
+        "const_arguments": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -s ',parameters('clusterName'),' -d ',parameters('nodeGroupName'),' -r ',parameters('coreGroupName'),' -h ',parameters('dmgrHostName'),' -o ',parameters('dmgrPort'))]",
+        "const_dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
+        "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
+        "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
+        "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]"
     },
     "resources": [
         {
@@ -100,7 +100,7 @@
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2019-06-01",
-            "name": "[concat(variables('managedVMPrefix'), copyIndex(1), '-ip')]",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '-ip')]",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "publicIPLoop",
@@ -109,14 +109,14 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(variables('dnsLabelPrefix')), concat('-mn', copyIndex(1)))]"
+                    "domainNameLabel": "[concat(toLower(variables('const_dnsLabelPrefix')), concat('-mn', copyIndex(1)))]"
                 }
             }
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2019-06-01",
-            "name": "[concat(variables('managedVMPrefix'), copyIndex(1), '-if')]",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '-if')]",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "nicLoop",
@@ -132,10 +132,10 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('managedVMPrefix'), copyIndex(1), '-ip'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('const_managedVMPrefix'), copyIndex(1), '-ip'))]"
                             },
                             "subnet": {
-                                "id": "[variables('subnetRef')]"
+                                "id": "[variables('ref_subnet')]"
                             }
                         }
                     }
@@ -145,7 +145,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-03-01",
-            "name": "[concat(variables('managedVMPrefix'), copyIndex(1))]",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1))]",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "virtualMachineLoop",
@@ -166,7 +166,7 @@
                         "version": "9.0.5"
                     },
                     "osDisk": {
-                        "name": "[concat(variables('managedVMPrefix'), copyIndex(1), '-disk')]",
+                        "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '-disk')]",
                         "createOption": "FromImage",
                         "managedDisk": {
                             "storageAccountType": "[parameters('osDiskType')]"
@@ -174,14 +174,14 @@
                     }
                 },
                 "osProfile": {
-                    "computerName": "[concat(variables('managedVMPrefix'), copyIndex(1))]",
+                    "computerName": "[concat(variables('const_managedVMPrefix'), copyIndex(1))]",
                     "adminUsername": "[parameters('vmAdminId')]",
                     "adminPassword": "[parameters('vmAdminPwd')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('managedVMPrefix'), copyIndex(1), '-if'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex(1), '-if'))]"
                         }
                     ]
                 }
@@ -195,7 +195,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-03-01",
-            "name": "[concat(variables('managedVMPrefix'), copyIndex(1), '/install')]",
+            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '/install')]",
             "location": "[parameters('location')]",
             "copy": {
                 "name": "virtualMachineExtensionLoop",
@@ -211,12 +211,12 @@
                 "typeHandlerVersion": "2.0",
                 "settings": {
                     "fileUris": [
-                        "[uri(variables('scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('scriptLocation'), concat('add-to-cluster.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('scriptLocation'), concat('get_custom_property.py', parameters('_artifactsLocationSasToken')))]"
+                        "[uri(variables('const_scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('const_scriptLocation'), concat('add-to-cluster.py', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('const_scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]",
+                        "[uri(variables('const_scriptLocation'), concat('get_custom_property.py', parameters('_artifactsLocationSasToken')))]"
                     ],
-                    "commandToExecute": "[concat('sh install.sh', variables('arguments'))]"
+                    "commandToExecute": "[concat('sh install.sh', variables('const_arguments'))]"
                 }
             }
         }
