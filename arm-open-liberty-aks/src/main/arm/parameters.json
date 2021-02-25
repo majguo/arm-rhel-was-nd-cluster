@@ -5,8 +5,13 @@
         "_artifactsLocation": {
             "value": "${artifactsLocationBase}/${project.artifactId}/${git.tag}/src/main/"
         },
-        "identityId": {
-            "value": "${identityId}"
+        "identity": {
+            "value": {
+                "type": "userAssigned",
+                "userAssignedIdentities": {
+                    "${identityId}": {}
+                }
+            }
         },
         "createAKSCluster": {
             "value": "${createAKSCluster}"

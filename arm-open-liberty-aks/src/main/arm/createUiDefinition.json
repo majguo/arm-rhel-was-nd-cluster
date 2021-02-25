@@ -5,14 +5,18 @@
     "parameters": {
         "basics": [
             {
-                "name": "identityId",
-                "type": "Microsoft.Common.TextBox",
-                "label": "User Assigned Managed Identity",
-                "toolTip": "Input the id of User Assigned Managed Identity.",
-                "constraints": {
-                    "required": true,
-                    "regex": "^[a-z0-9A-Z\\-\\.\\/]+$",
-                    "validationMessage": "The user assigned managed identity ID should be a valid Azure resource ID. Example: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}"
+                "name": "identity",
+                "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                "label": "Managed Identity Configuration",
+                "toolTip": {
+                    "userAssignedIdentity": "Add user-assigned identities to enable the app deployment."
+                },
+                "defaultValue": {
+                    "systemAssignedIdentity": "Off"
+                },
+                "options": {
+                    "hideSystemAssignedIdentity": true,
+                    "hideUserAssignedIdentity": false
                 }
             }
         ],
@@ -188,7 +192,7 @@
         ],
         "outputs": {
             "location": "[location()]",
-            "identityId": "[basics('identityId')]",
+            "identity": "[basics('identity')]",
             "createAKSCluster": "[bool(steps('AKSCluster').createAKSCluster)]",
             "aksClusterName": "[steps('AKSCluster').clusterInfo.aksClusterName]",
             "aksClusterRGName": "[steps('AKSCluster').clusterInfo.aksClusterRGName]",

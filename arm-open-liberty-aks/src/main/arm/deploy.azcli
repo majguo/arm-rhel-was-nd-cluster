@@ -142,6 +142,8 @@ storageAccountName="${storageAccountName:0:19}"
 storageAccountName="stage$storageAccountName"
 storageAccountRGName="$storageAccountName-rg"
 
+set +e
+
 #Check for existing RG
 az group show --name $storageAccountRGName 1> /dev/null
 

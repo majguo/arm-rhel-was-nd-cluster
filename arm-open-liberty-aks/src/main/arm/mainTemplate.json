@@ -14,8 +14,8 @@
             "type": "string",
             "defaultValue": "[resourceGroup().location]"
         },
-        "identityId": {
-            "type": "string"
+        "identity": {
+            "type": "object"
         },
         "createAKSCluster": {
             "defaultValue": true,
@@ -134,12 +134,7 @@
                 "[resourceId('Microsoft.ContainerService/managedClusters', variables('aksClusterName'))]"
             ],
             "kind": "AzureCLI",
-            "identity": {
-                "type": "userAssigned",
-                "userAssignedIdentities": {
-                    "[parameters('identityId')]": {}
-                }
-            },
+            "identity": "[parameters('identity')]",
             "properties": {
                 "AzCliVersion": "2.15.0",
                 "arguments": "[variables('arguments')]",
