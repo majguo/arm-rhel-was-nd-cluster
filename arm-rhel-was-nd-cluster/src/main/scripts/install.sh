@@ -167,7 +167,6 @@ done
 # Check whether the user is entitled or not
 while [ ! -f "/var/log/cloud-init-was.log" ]
 do
-    echo "waiting for was entitlement check started..."
     sleep 5
 done
 
@@ -178,11 +177,10 @@ do
     if [[ $result = Unentitled ]] || [[ $result = Entitled ]]; then
         isDone=true
     else
-        echo "waiting for was entitlement check completed..."
         sleep 5
     fi
 done
-echo $result
+echo "The input IBMid account is: ${result}."
 
 # Terminate the process for the un-entitled user
 if [ ${result} = Unentitled ]; then
