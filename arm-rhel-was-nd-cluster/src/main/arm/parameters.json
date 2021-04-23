@@ -31,39 +31,6 @@
         },
         "adminPwd": {
             "value": "${adminPwd}"
-        },
-        "connectToDB2Server": {
-            "value": "${connectToDB2Server}"
-        },
-        "db2ServerName": {
-            "value": "${db2ServerName}"
-        },
-        "db2ServerPortNumber": {
-            "value": "${db2ServerPortNumber}"
-        },
-        "db2DBName": {
-            "value": "${db2DBName}"
-        },
-        "db2DBUserName": {
-            "value": "${db2DBUserName}"
-        },
-        "db2DBUserPwd": {
-            "value": "${db2DBUserPwd}"
-        },
-        "db2DSJndiName": {
-            "value": "${db2DSJndiName}"
-        },
-        "connectToELK": {
-            "value": "${connectToELK}"
-        },
-        "cloudId": {
-            "value": "${cloudId}"
-        },
-        "cloudAuthUser": {
-            "value": "${cloudAuthUser}"
-        },
-        "cloudAuthPwd": {
-            "value": "${cloudAuthPwd}"
         }
     }
 }

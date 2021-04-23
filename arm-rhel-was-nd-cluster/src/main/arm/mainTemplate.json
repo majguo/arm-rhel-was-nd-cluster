@@ -62,59 +62,13 @@
         "adminPwd": {
             "type": "securestring"
         },
-        "connectToDB2Server": {
-            "defaultValue": false,
-            "type": "bool"
-        },
-        "db2ServerName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2ServerPortNumber": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2DBName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2DBUserName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "db2DBUserPwd": {
-            "defaultValue": "",
-            "type": "securestring"
-        },
-        "db2DSJndiName": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "connectToELK": {
-            "defaultValue": false,
-            "type": "bool"
-        },
-        "cloudId": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "cloudAuthUser": {
-            "defaultValue": "",
-            "type": "string"
-        },
-        "cloudAuthPwd": {
-            "defaultValue": "",
-            "type": "securestring"
-        },
         "guidValue": {
             "defaultValue": "[newGuid()]",
             "type": "string"
         }
     },
     "variables": {
-        "const_arguments1": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('name_dmgrVM'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
-        "const_arguments2": "[if(parameters('connectToDB2Server'),concat(' -n \"',parameters('db2ServerName'),'\" -t ',parameters('db2ServerPortNumber'),' -d ',parameters('db2DBName'),' -i ',parameters('db2DBUserName'),' -s ',parameters('db2DBUserPwd'),' -j ',parameters('db2DSJndiName')),' -n  -t  -d  -i  -s  -j ')]",
-        "const_arguments3": "[if(parameters('connectToELK'),concat(' -g ',parameters('cloudId'),' -o ',parameters('cloudAuthUser'),' -k ',parameters('cloudAuthPwd')),' -g  -o  -k ')]",
+        "const_arguments": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('name_dmgrVM'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
         "const_dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
         "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
         "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
@@ -339,13 +293,9 @@
                     "fileUris": [
                         "[uri(variables('const_scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
                         "[uri(variables('const_scriptLocation'), concat('create-cluster.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('create-ds.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('get_custom_property.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('set_custom_property.py', parameters('_artifactsLocationSasToken')))]"
+                        "[uri(variables('const_scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]"
                     ],
-                    "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('const_arguments1'), variables('const_arguments2'), variables('const_arguments3'))]"
+                    "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('const_arguments'))]"
                 }
             }
         }
