@@ -127,6 +127,29 @@
                                 }
                             },
                             {
+                                "name": "ibmUserId",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Username for IBMid",
+                                "toolTip": "Use only allowed characters",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "ibmUserPwd",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password for IBMid",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "Password for IBMid",
+                                "constraints": {
+                                    "required": true
+                                }
+                            },
+                            {
                                 "name": "adminUsername",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Username for admin account of VM",
@@ -189,6 +212,8 @@
             "managedVMPrefix": "[basics('managedVMPrefix')]",
             "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
             "vmSize": "[steps('VirtualMachineConfig').vmSizeSelect]",
+            "ibmUserId": "[steps('Prerequisites').Credentials.ibmUserId]",
+            "ibmUserPwd": "[steps('Prerequisites').Credentials.ibmUserPwd]",
             "vmAdminId": "[steps('Prerequisites').Credentials.adminUsername]",
             "vmAdminPwd": "[steps('Prerequisites').Credentials.adminPassword]",
             "adminUser": "[steps('Prerequisites').Credentials.wasAdminUsername]",
