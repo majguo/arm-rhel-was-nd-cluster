@@ -116,12 +116,12 @@ create_custom_profile() {
     dmgrAdminUserName=$6
     dmgrAdminPassword=$7
     
-    curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
-    while [ $? -ne 0 ]
+    curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
+    while [ $? -ne 56 ]
     do
         sleep 5
         echo "dmgr is not ready"
-        curl $dmgrHostName:$dmgrPort >/dev/null 2>&1
+        curl $dmgrHostName:$dmgrPort --output - >/dev/null 2>&1
     done
     sleep 60
     echo "dmgr is ready to add nodes"
@@ -190,7 +190,7 @@ if [ ${result} = Unentitled ]; then
 fi
 
 # Update applications installed on the system
-yum update
+yum update -y
 
 # Turn off firewall
 systemctl stop firewalld
