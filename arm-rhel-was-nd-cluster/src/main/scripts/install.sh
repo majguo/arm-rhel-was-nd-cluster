@@ -182,6 +182,9 @@ do
 done
 echo "The input IBMid account is: ${result}."
 
+# Remove cloud-init artifacts and logs
+cloud-init clean --logs
+
 # Terminate the process for the un-entitled user
 if [ ${result} = Unentitled ]; then
     exit 1
