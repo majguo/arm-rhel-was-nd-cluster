@@ -30,6 +30,10 @@
         "dnsLabelPrefix": {
             "type": "string"
         },
+        "vmImageId": {
+            "defaultValue": "",
+            "type": "string"
+        },
         "vmSize": {
             "defaultValue": "Standard_D2_v3",
             "type": "string"
@@ -242,10 +246,7 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "microsoft_javaeeonazure_test",
-                        "offer": "2021-zheng-image-offer-preview",
-                        "sku": "2021-zheng-rhel-with-websphere",
-                        "version": "latest"
+                        "id": "[parameters('vmImageId')]"
                     },
                     "osDisk": {
                         "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-disk')]",
@@ -274,11 +275,6 @@
                         "storageUri": "[reference(variables('ref_storage'), '2019-06-01').primaryEndpoints.blob]"
                     }
                 }
-            },
-            "plan": {
-                "name": "2021-zheng-rhel-with-websphere",
-                "publisher": "microsoft_javaeeonazure_test",
-                "product": "2021-zheng-image-offer-preview"
             }
         },
         {
