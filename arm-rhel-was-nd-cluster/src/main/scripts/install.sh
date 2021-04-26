@@ -59,6 +59,7 @@ ExecStart=/bin/sh -c "${tWASDirectory}/profiles/${profileName}/bin/startServer.s
 ExecStop=/bin/sh -c "${tWASDirectory}/profiles/${profileName}/bin/stopServer.sh ${serverName}"
 PIDFile=${tWASDirectory}/profiles/${profileName}/logs/${serverName}/${serverName}.pid
 SuccessExitStatus=143 0
+TimeoutStartSec=900
 [Install]
 WantedBy=default.target
 EOF
