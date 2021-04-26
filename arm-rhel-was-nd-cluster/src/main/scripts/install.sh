@@ -181,7 +181,7 @@ do
         sleep 5
     fi
 done
-echo "The input IBMid account is: ${result}."
+echo "The input IBMid account is ${result}."
 
 # Remove cloud-init artifacts and logs
 cloud-init clean --logs
