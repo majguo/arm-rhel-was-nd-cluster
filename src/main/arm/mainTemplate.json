@@ -92,22 +92,8 @@
     },
     "resources": [
         {
-            "apiVersion": "2019-09-01",
-            "name": "${tracking.pid}",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                    ]
-                }
-            }
-        },
-        {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion2}",
             "name": "[variables('name_storageAccount')]",
             "location": "[parameters('location')]",
             "sku": {
@@ -119,7 +105,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_networkSecurityGroup')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -147,7 +133,7 @@
         },
         {
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[variables('name_virtualNetwork')]",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -165,7 +151,7 @@
         },
         {
             "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(variables('name_virtualNetwork'), '/', parameters('subnetName'))]",
             "dependsOn": [
                 "[variables('ref_virtualNetwork')]",
@@ -180,7 +166,7 @@
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-ip')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -196,7 +182,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '-if')]",
             "location": "[parameters('location')]",
             "copy": {
@@ -226,7 +212,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex()))]",
             "location": "[parameters('location')]",
             "copy": {
@@ -271,7 +257,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[reference(variables('ref_storage'), '2019-06-01').primaryEndpoints.blob]"
+                        "storageUri": "[reference(variables('ref_storage'), '${azure.apiVersion2}').primaryEndpoints.blob]"
                     }
                 }
             },
@@ -283,7 +269,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2019-03-01",
+            "apiVersion": "${azure.apiVersion}",
             "name": "[concat(if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex())), '/install')]",
             "location": "[parameters('location')]",
             "copy": {

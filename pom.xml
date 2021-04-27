@@ -20,7 +20,7 @@
 
     <groupId>com.ibm.websphere.azure</groupId>
     <artifactId>arm-rhel-was-nd-cluster</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.5</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
@@ -33,8 +33,8 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <!-- `tracking.pid` is deprecated, use `template.pid.properties.url` & `template.microsoft.pid.properties.url` instead -->
-        <tracking.pid>pid-6801777e-8fdd-5241-b640-379957dd3e89</tracking.pid>
         <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
+        <azure.apiVersion>2020-06-01</azure.apiVersion>
+        <azure.apiVersion2>2019-06-01</azure.apiVersion2>
     </properties>
 </project>
