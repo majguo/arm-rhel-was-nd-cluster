@@ -20,7 +20,7 @@
 
     <groupId>com.ibm.websphere.azure</groupId>
     <artifactId>arm-rhel-was-nd-cluster</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
@@ -36,5 +36,8 @@
         <test.parameters>-TestParameter '@{&quot;PasswordMinLength&quot;=6}'</test.parameters>
         <azure.apiVersion>2020-06-01</azure.apiVersion>
         <azure.apiVersion2>2019-06-01</azure.apiVersion2>
+        <image.publisher>microsoft_javaeeonazure_test</image.publisher>
+        <image.offer>2021-zheng-image-offer-preview</image.offer>
+        <image.sku>2021-zheng-rhel-with-websphere</image.sku>
     </properties>
 </project>

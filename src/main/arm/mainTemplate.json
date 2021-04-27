@@ -228,9 +228,9 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "microsoft_javaeeonazure_test",
-                        "offer": "2021-zheng-image-offer-preview",
-                        "sku": "2021-zheng-rhel-with-websphere",
+                        "publisher": "${image.publisher}",
+                        "offer": "${image.offer}",
+                        "sku": "${image.sku}",
                         "version": "latest"
                     },
                     "osDisk": {
@@ -262,9 +262,9 @@
                 }
             },
             "plan": {
-                "name": "2021-zheng-rhel-with-websphere",
-                "publisher": "microsoft_javaeeonazure_test",
-                "product": "2021-zheng-image-offer-preview"
+                "name": "${image.sku}",
+                "publisher": "${image.publisher}",
+                "product": "${image.offer}"
             }
         },
         {

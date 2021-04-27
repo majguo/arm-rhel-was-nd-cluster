@@ -133,18 +133,18 @@
                                 "toolTip": "Use only allowed characters",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
+                                    "validationMessage": "The value must be valid IBMid user name."
                                 }
                             },
                             {
                                 "name": "ibmUserPwd",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
-                                    "password": "Password for IBMid",
+                                    "password": "Password for IBMid account",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "Password for IBMid",
+                                "toolTip": "Password for IBMid account",
                                 "constraints": {
                                     "required": true
                                 }
