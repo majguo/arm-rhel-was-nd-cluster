@@ -26,17 +26,20 @@
         "ibmUserPwd": {
             "value": "${ibmUserPwd}"
         },        
-        "vmAdminId": {
-            "value": "${vmAdminId}"
+        "adminUsername": {
+            "value": "${adminUsername}"
         },
-        "vmAdminPwd": {
-            "value": "${vmAdminPwd}"
+        "adminPasswordOrKey": {
+            "value": "${adminPasswordOrKey}"
         },
-        "adminUser": {
-            "value": "${adminUser}"
+        "authenticationType": {
+            "value": "password"
         },
-        "adminPwd": {
-            "value": "${adminPwd}"
+        "wasUsername": {
+            "value": "${wasUsername}"
+        },
+        "wasPassword": {
+            "value": "${wasPassword}"
         }
     }
 }

@@ -58,16 +58,27 @@
             "defaultValue": "10.0.1.0/24",
             "type": "string"
         },
-        "vmAdminId": {
+        "adminUsername": {
             "type": "string"
         },
-        "vmAdminPwd": {
+        "adminPasswordOrKey": {
             "type": "securestring"
         },
-        "adminUser": {
+        "authenticationType": {
+            "type": "string",
+            "defaultValue": "password",
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ],
+            "metadata": {
+                "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+            }
+        },
+        "wasUsername": {
             "type": "string"
         },
-        "adminPwd": {
+        "wasPassword": {
             "type": "securestring"
         },
         "guidValue": {
@@ -76,8 +87,19 @@
         }
     },
     "variables": {
-        "const_arguments": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -h ',variables('name_dmgrVM'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
+        "const_arguments": "[concat(' -m ',parameters('wasUsername'),' -c ',parameters('wasPassword'),' -h ',variables('name_dmgrVM'),' -r ',sub(parameters('numberOfNodes'),1),' -x ',parameters('dynamic'))]",
         "const_dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
+        "const_linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('adminPasswordOrKey')]"
+                    }
+                ]
+            }
+        },
         "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
         "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "name_dmgrVM": "[concat(parameters('dmgrVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
@@ -243,8 +265,9 @@
                 },
                 "osProfile": {
                     "computerName": "[if(equals(copyIndex(), 0), variables('name_dmgrVM'), concat(variables('const_managedVMPrefix'), copyIndex()))]",
-                    "adminUsername": "[parameters('vmAdminId')]",
-                    "adminPassword": "[parameters('vmAdminPwd')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPasswordOrKey')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]",
                     "customData": "[base64(concat(parameters('ibmUserId'), ',', parameters('ibmUserPwd')))]"
                 },
                 "networkProfile": {

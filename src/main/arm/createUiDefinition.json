@@ -130,7 +130,7 @@
                                 "name": "ibmUserId",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Username for IBMid",
-                                "toolTip": "Use only allowed characters",
+                                "toolTip": "User name of IBMid account.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
@@ -144,7 +144,7 @@
                                     "password": "Password for IBMid account",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "Password for IBMid account",
+                                "toolTip": "Password of IBMid account.",
                                 "constraints": {
                                     "required": true
                                 }
@@ -152,9 +152,9 @@
                             {
                                 "name": "adminUsername",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Username for admin account of VM",
+                                "label": "Username for admin account of VMs",
                                 "defaultValue": "websphere",
-                                "toolTip": "Use only allowed characters",
+                                "toolTip": "Use only letters and numbers.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^[a-z0-9A-Z]{1,30}$",
@@ -162,25 +162,36 @@
                                 }
                             },
                             {
-                                "name": "adminPassword",
-                                "type": "Microsoft.Common.PasswordBox",
+                                "name": "adminPasswordOrKey",
+                                "type": "Microsoft.Compute.CredentialsCombo",
                                 "label": {
-                                    "password": "Password for admin account of VM",
-                                    "confirmPassword": "Confirm password"
+                                    "authenticationType": "Authentication type",
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password",
+                                    "sshPublicKey": "SSH public key"
                                 },
-                                "toolTip": "Password for admin account of Virtual Machine",
+                                "toolTip": {
+                                    "authenticationType": "Use username and password or SSH public key for authentication to the VM.",
+                                    "password": "Password for admin account of VMs.",
+                                    "sshPublicKey": "SSH key for admin account of VMs."
+                                },
                                 "constraints": {
                                     "required": true,
-                                    "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
-                                    "validationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character."
-                                }
+                                    "customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
+                                    "customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character."
+                                },
+                                "options": {
+                                    "hideConfirmation": false,
+                                    "hidePassword": false
+                                },
+                                "osPlatform": "Linux"
                             },
                             {
-                                "name": "wasAdminUsername",
+                                "name": "wasUsername",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Username for admin account of WebSphere",
                                 "defaultValue": "wasadmin",
-                                "toolTip": "Use only allowed characters",
+                                "toolTip": "Use only allowed characters.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^[a-z0-9A-Z]{1,30}$",
@@ -188,13 +199,13 @@
                                 }
                             },
                             {
-                                "name": "wasAdminPassword",
+                                "name": "wasPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
                                     "password": "Password for admin account of WebSphere",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "Password for admin account of WebSphere",
+                                "toolTip": "Password for admin account of WebSphere.",
                                 "constraints": {
                                     "required": true
                                 }
@@ -214,10 +225,11 @@
             "vmSize": "[steps('VirtualMachineConfig').vmSizeSelect]",
             "ibmUserId": "[steps('Prerequisites').Credentials.ibmUserId]",
             "ibmUserPwd": "[steps('Prerequisites').Credentials.ibmUserPwd]",
-            "vmAdminId": "[steps('Prerequisites').Credentials.adminUsername]",
-            "vmAdminPwd": "[steps('Prerequisites').Credentials.adminPassword]",
-            "adminUser": "[steps('Prerequisites').Credentials.wasAdminUsername]",
-            "adminPwd": "[steps('Prerequisites').Credentials.wasAdminPassword]"
+            "adminUsername": "[steps('Prerequisites').Credentials.adminUsername]",
+            "adminPasswordOrKey": "[if(equals(steps('Prerequisites').Credentials.adminPasswordOrKey.authenticationType, 'password'), steps('Prerequisites').Credentials.adminPasswordOrKey.password, steps('Prerequisites').Credentials.adminPasswordOrKey.sshPublicKey)]",
+            "authenticationType": "[steps('Prerequisites').Credentials.adminPasswordOrKey.authenticationType]",
+            "wasUsername": "[steps('Prerequisites').Credentials.wasUsername]",
+            "wasPassword": "[steps('Prerequisites').Credentials.wasPassword]"
         }
     }
 }
