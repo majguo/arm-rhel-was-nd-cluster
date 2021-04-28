@@ -29,7 +29,7 @@
                 "type": "Microsoft.Common.TextBox",
                 "label": "Number of VMs",
                 "defaultValue": "4",
-                "toolTip": "The number of VMs to create, with one deployment manager and multiple worker nodes for the remainings. For dynamic cluster, it's the maximum number of nodes running together.",
+                "toolTip": "The number of VMs to create, with one deployment manager and multiple worker nodes for the remainings.",
                 "constraints": {
                     "required": true,
                     "regex": "^(2|3|4|5)$",
