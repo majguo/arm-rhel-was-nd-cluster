@@ -5,84 +5,101 @@
     "parameters": {
         "basics": [
             {
-                "name": "dynamic",
-                "type": "Microsoft.Common.OptionsGroup",
-                "label": "Dynamic cluster?",
-                "defaultValue": "No",
-                "toolTip": "Select 'Yes' to create a dynamic cluster which enables WebSphere to start/stop nodes on-demand dynamically.",
+                "name": "ibmIdInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "options": {
+                    "icon": "Info",
+                    "text": "You must provide an entitled IBMid account to provision the WebSphere cluster. Select here for more details.",
+                    "uri": "https://www.ibm.com/ibmid/myibm/help/us/helpdesk.html"
+                }
+            },
+            {
+                "name": "ibmUserId",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Username for IBMid",
+                "toolTip": "Username of IBMid account.",
                 "constraints": {
-                    "allowedValues": [
-                        {
-                            "label": "Yes",
-                            "value": "true"
-                        },
-                        {
-                            "label": "No",
-                            "value": "false"
-                        }
-                    ],
+                    "required": true,
+                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
+                    "validationMessage": "The value must be valid IBMid username."
+                }
+            },
+            {
+                "name": "ibmUserPwd",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                    "password": "Password for IBMid account",
+                    "confirmPassword": "Confirm password"
+                },
+                "toolTip": "Password of IBMid account.",
+                "constraints": {
                     "required": true
                 }
             },
             {
-                "name": "numberOfNodes",
-                "type": "Microsoft.Common.TextBox",
-                "label": "Number of VMs",
-                "defaultValue": "4",
-                "toolTip": "The number of VMs to create, with one deployment manager and multiple worker nodes for the remainings.",
-                "constraints": {
-                    "required": true,
-                    "regex": "^(2|3|4|5)$",
-                    "validationMessage": "Number of VMs to deploy, limit 5."
+                "name": "licenseInfo",
+                "type": "Microsoft.Common.InfoBox",
+                "options": {
+                    "icon": "Info",
+                    "text": "You must accept the IBM License Agreement to proceed the deployment. Select here for more details.",
+                    "uri": "https://www.ibm.com/software/sla/sladb.nsf/searchlis/?searchview&searchorder=4&searchmax=0&query=%225724-H88%22"
                 }
             },
             {
-                "name": "dmgrVMPrefix",
+                "name": "acceptIBMLicenseAgreement",
+                "label": "Accept IBM License Agreement",
                 "type": "Microsoft.Common.TextBox",
-                "label": "Deployment manager server prefix",
-                "toolTip": "The string to prepend to the name of the deployment manager server.",
-                "defaultValue": "dmgr",
+                "toolTip": "A value not equal to Y/y indicates you do not accept the IBM License Agreement. In that case the deployment will not proceed.",
+                "defaultValue": "Y",
                 "constraints": {
                     "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,14}$",
-                    "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
-                }
-            },
-            {
-                "name": "managedVMPrefix",
-                "type": "Microsoft.Common.TextBox",
-                "label": "Managed server prefix",
-                "toolTip": "The string to prepend to the name of the managed server.",
-                "defaultValue": "managed",
-                "constraints": {
-                    "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,14}$",
-                    "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
-                }
-            },
-            {
-                "name": "dnsLabelPrefix",
-                "type": "Microsoft.Common.TextBox",
-                "label": "DNS label prefix",
-                "toolTip": "The string to prepend to the DNS label.",
-                "defaultValue": "wasndcluster",
-                "constraints": {
-                    "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,24}$",
-                    "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
+                    "regex": "^[Yy]$",
+                    "validationMessage": "The value must be Y/y to proceed with deployment."
                 }
             }
         ],
         "steps": [
             {
-                "name": "VirtualMachineConfig",
-                "label": "Virtual machine settings",
+                "name": "ClusterConfig",
+                "label": "Cluster configuration",
                 "subLabel": {
-                    "preValidation": "Configure the resources and settings of the virtual machine that installs IBM WebSphere.",
+                    "preValidation": "Configure the resources and settings of the virtual machine that installs IBM WebSphere cluster.",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Virtual machine settings",
+                "bladeTitle": "Cluster configuration",
                 "elements": [
+                    {
+                        "name": "dynamic",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Dynamic cluster?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to create a dynamic cluster which enables WebSphere to start/stop nodes on-demand dynamically.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "numberOfNodes",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Number of VMs",
+                        "defaultValue": "4",
+                        "toolTip": "The number of VMs to create, with one deployment manager and multiple worker nodes for the remainings.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(2|3|4|5)$",
+                            "validationMessage": "Number of VMs to deploy, limit 5."
+                        }
+                    },
                     {
                         "name": "vmSizeSelect",
                         "type": "Microsoft.Compute.SizeSelector",
@@ -97,139 +114,133 @@
                         ],
                         "osPlatform": "Linux",
                         "count": "1"
+                    },
+                    {
+                        "name": "dmgrVMPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Deployment manager server prefix",
+                        "toolTip": "The string to prepend to the name of the deployment manager server.",
+                        "defaultValue": "dmgr",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,14}$",
+                            "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
+                        }
+                    },
+                    {
+                        "name": "managedVMPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Managed server prefix",
+                        "toolTip": "The string to prepend to the name of the managed server.",
+                        "defaultValue": "managed",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,14}$",
+                            "validationMessage": "The prefix must be between 3 and 14 characters long and contain letters, numbers only."
+                        }
+                    },
+                    {
+                        "name": "dnsLabelPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "DNS label prefix",
+                        "toolTip": "The string to prepend to the DNS label.",
+                        "defaultValue": "wasndcluster",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,24}$",
+                            "validationMessage": "The prefix must be between 3 and 24 characters long and contain letters, numbers only."
+                        }
                     }
                 ]
             },
             {
-                "name": "Prerequisites",
-                "label": "Prerequisites for WebSphere creation",
+                "name": "Credentials",
+                "label": "Credentials",
                 "subLabel": {
-                    "preValidation": "Provide prerequisites required for WebSphere creation",
+                    "preValidation": "Provide Credentials to manage WebSphere cluster",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Prerequisites for WebSphere creation",
+                "bladeTitle": "Credentials",
                 "elements": [
                     {
-                        "name": "Credentials",
-                        "type": "Microsoft.Common.Section",
-                        "label": "Credentials for WebSphere creation",
-                        "elements": [
-                            {
-                                "name": "acceptIBMLicenseAgreement",
-                                "label": "Accept IBM License Agreement",
-                                "type": "Microsoft.Common.TextBox",
-                                "toolTip": "A value not equal to Y/y indicates you do not accept the IBM License Agreement. In that case the deployment will not proceed.",
-                                "defaultValue": "Y",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[Yy]$",
-                                    "validationMessage": "The value must be Y/y to proceed with deployment."
-                                }
-                            },
-                            {
-                                "name": "ibmUserId",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Username for IBMid",
-                                "toolTip": "User name of IBMid account.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
-                                    "validationMessage": "The value must be valid IBMid user name."
-                                }
-                            },
-                            {
-                                "name": "ibmUserPwd",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password for IBMid account",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "Password of IBMid account.",
-                                "constraints": {
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "adminUsername",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Username for admin account of VMs",
-                                "defaultValue": "websphere",
-                                "toolTip": "Use only letters and numbers.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "adminPasswordOrKey",
-                                "type": "Microsoft.Compute.CredentialsCombo",
-                                "label": {
-                                    "authenticationType": "Authentication type",
-                                    "password": "Password",
-                                    "confirmPassword": "Confirm password",
-                                    "sshPublicKey": "SSH public key"
-                                },
-                                "toolTip": {
-                                    "authenticationType": "Use username and password or SSH public key for authentication to the VM.",
-                                    "password": "Password for admin account of VMs.",
-                                    "sshPublicKey": "SSH key for admin account of VMs."
-                                },
-                                "constraints": {
-                                    "required": true,
-                                    "customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
-                                    "customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character."
-                                },
-                                "options": {
-                                    "hideConfirmation": false,
-                                    "hidePassword": false
-                                },
-                                "osPlatform": "Linux"
-                            },
-                            {
-                                "name": "wasUsername",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Username for admin account of WebSphere",
-                                "defaultValue": "wasadmin",
-                                "toolTip": "Use only allowed characters.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
-                                }
-                            },
-                            {
-                                "name": "wasPassword",
-                                "type": "Microsoft.Common.PasswordBox",
-                                "label": {
-                                    "password": "Password for admin account of WebSphere",
-                                    "confirmPassword": "Confirm password"
-                                },
-                                "toolTip": "Password for admin account of WebSphere.",
-                                "constraints": {
-                                    "required": true
-                                }
-                            }
-                        ]
+                        "name": "adminUsername",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Username for admin account of VMs",
+                        "defaultValue": "websphere",
+                        "toolTip": "Use only letters and numbers.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                        }
+                    },
+                    {
+                        "name": "adminPasswordOrKey",
+                        "type": "Microsoft.Compute.CredentialsCombo",
+                        "label": {
+                            "authenticationType": "Authentication type",
+                            "password": "Password",
+                            "confirmPassword": "Confirm password",
+                            "sshPublicKey": "SSH public key"
+                        },
+                        "toolTip": {
+                            "authenticationType": "Use username and password or SSH public key for authentication to the VM.",
+                            "password": "Password for admin account of VMs.",
+                            "sshPublicKey": "SSH key for admin account of VMs."
+                        },
+                        "constraints": {
+                            "required": true,
+                            "customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
+                            "customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character."
+                        },
+                        "options": {
+                            "hideConfirmation": false,
+                            "hidePassword": false
+                        },
+                        "osPlatform": "Linux"
+                    },
+                    {
+                        "name": "wasUsername",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Username for WebSphere admin",
+                        "defaultValue": "wasadmin",
+                        "toolTip": "Use only allowed characters.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{1,30}$",
+                            "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                        }
+                    },
+                    {
+                        "name": "wasPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password for WebSphere admin",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "Password for WebSphere admin.",
+                        "constraints": {
+                            "required": true
+                        }
                     }
                 ]
             }
         ],
         "outputs": {
             "location": "[location()]",
-            "dynamic": "[bool(basics('dynamic'))]",
-            "numberOfNodes": "[int(basics('numberOfNodes'))]",
-            "dmgrVMPrefix": "[basics('dmgrVMPrefix')]",
-            "managedVMPrefix": "[basics('managedVMPrefix')]",
-            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
-            "vmSize": "[steps('VirtualMachineConfig').vmSizeSelect]",
-            "ibmUserId": "[steps('Prerequisites').Credentials.ibmUserId]",
-            "ibmUserPwd": "[steps('Prerequisites').Credentials.ibmUserPwd]",
-            "adminUsername": "[steps('Prerequisites').Credentials.adminUsername]",
-            "adminPasswordOrKey": "[if(equals(steps('Prerequisites').Credentials.adminPasswordOrKey.authenticationType, 'password'), steps('Prerequisites').Credentials.adminPasswordOrKey.password, steps('Prerequisites').Credentials.adminPasswordOrKey.sshPublicKey)]",
-            "authenticationType": "[steps('Prerequisites').Credentials.adminPasswordOrKey.authenticationType]",
-            "wasUsername": "[steps('Prerequisites').Credentials.wasUsername]",
-            "wasPassword": "[steps('Prerequisites').Credentials.wasPassword]"
+            "ibmUserId": "[basics('ibmUserId')]",
+            "ibmUserPwd": "[basics('ibmUserPwd')]",
+            "dynamic": "[bool(steps('ClusterConfig').dynamic)]",
+            "numberOfNodes": "[int(steps('ClusterConfig').numberOfNodes)]",
+            "vmSize": "[steps('ClusterConfig').vmSizeSelect]",
+            "dmgrVMPrefix": "[steps('ClusterConfig').dmgrVMPrefix]",
+            "managedVMPrefix": "[steps('ClusterConfig').managedVMPrefix]",
+            "dnsLabelPrefix": "[steps('ClusterConfig').dnsLabelPrefix]",
+            "adminUsername": "[steps('Credentials').adminUsername]",
+            "adminPasswordOrKey": "[if(equals(steps('Credentials').adminPasswordOrKey.authenticationType, 'password'), steps('Credentials').adminPasswordOrKey.password, steps('Credentials').adminPasswordOrKey.sshPublicKey)]",
+            "authenticationType": "[steps('Credentials').adminPasswordOrKey.authenticationType]",
+            "wasUsername": "[steps('Credentials').wasUsername]",
+            "wasPassword": "[steps('Credentials').wasPassword]"
         }
     }
 }

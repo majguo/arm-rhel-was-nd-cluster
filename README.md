@@ -18,7 +18,7 @@
 1. Build the project by replacing all placeholder `${<place_holder>}` with valid values
 
    ```bash
-   mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DvmAdminId=<vmAdminId> -DvmAdminPwd=<vmAdminPwd> -DadminUser=<adminUser> -DadminPwd=<adminPwd> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
+   mvn -Dgit.repo=<repo_user> -Dgit.tag=<repo_tag> -DibmUserId=<ibmUserId> -DibmUserPwd=<ibmUserPwd> -Ddynamic=<true|false> -DnumberOfNodes=<numberOfNodes> -DdmgrVMPrefix=<dmgrVMPrefix> -DmanagedVMPrefix=<managedVMPrefix> -DdnsLabelPrefix=<dnsLabelPrefix> -DadminUsername=<adminUsername> -DadminPasswordOrKey=<adminPassword> -DwasUsername=<wasUsername> -DwasPassword=<wasPassword> -Dtest.args="-Test All" -Ptemplate-validation-tests clean install
    ```
 
 1. Change to `./target/arm` directory

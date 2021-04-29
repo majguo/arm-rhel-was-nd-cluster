@@ -65,7 +65,7 @@
             "defaultValue": "",
             "type": "string",
             "metadata": {
-                "description": "User name of your IBMid account."
+                "description": "Username of your IBMid account."
             }
         },
         "ibmUserPwd": {
@@ -78,7 +78,7 @@
         "adminUsername": {
             "type": "string",
             "metadata": {
-                "description": "User name for the Virtual Machine."
+                "description": "Username for the Virtual Machine."
             }
         },
         "adminPasswordOrKey": {
@@ -101,13 +101,13 @@
         "wasUsername": {
             "type": "string",
             "metadata": {
-                "description": "User name for your WebSphere admin console."
+                "description": "Username for WebSphere admin."
             }
         },
         "wasPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "Password for your WebSphere admin console."
+                "description": "Password for WebSphere admin."
             }
         },
         "guidValue": {
@@ -145,6 +145,20 @@
         "ref_virtualNetwork": "[resourceId('Microsoft.Network/virtualNetworks', variables('name_virtualNetwork'))]"
     },
     "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.start}",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "${azure.apiVersion2}",
@@ -346,6 +360,23 @@
                         "[uri(variables('const_scriptLocation'), concat('create-dcluster.py', parameters('_artifactsLocationSasToken')))]"
                     ],
                     "commandToExecute": "[concat('sh install.sh -f ', equals(copyIndex(), 0), variables('const_arguments'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "${cluster.end}",
+            "dependsOn": [
+                "virtualMachineExtensionLoop"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
                 }
             }
         }
