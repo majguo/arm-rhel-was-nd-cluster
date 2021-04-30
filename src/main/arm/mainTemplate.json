@@ -23,8 +23,19 @@
                 "description": "Location for all resources."
             }
         },
+        "ibmUserId": {
+            "type": "string",
+            "metadata": {
+                "description": "Username of your IBMid account."
+            }
+        },
+        "ibmUserPwd": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of your IBMid account."
+            }
+        },
         "dynamic": {
-            "defaultValue": false,
             "type": "bool",
             "metadata": {
                 "description": "Boolean value indicating, if the cluster is a dynamic one or not."
@@ -35,6 +46,12 @@
             "metadata": {
                 "description": "The number of VMs to create, with one deployment manager and multiple worker nodes for the remainings."
             }
+        },
+        "vmSize": {
+            "type": "string",
+            "metadata": {
+                "description": "The size of virtual machine to provision for each node of the cluster."
+            }            
         },
         "dmgrVMPrefix": {
             "type": "string",
@@ -54,27 +71,6 @@
                 "description": "The string to prepend to the DNS label."
             }
         },
-        "vmSize": {
-            "defaultValue": "Standard_D2_v3",
-            "type": "string",
-            "metadata": {
-                "description": "The size of virtual machine to provision for each node of the cluster."
-            }            
-        },
-        "ibmUserId": {
-            "defaultValue": "",
-            "type": "string",
-            "metadata": {
-                "description": "Username of your IBMid account."
-            }
-        },
-        "ibmUserPwd": {
-            "defaultValue": "",
-            "type": "securestring",
-            "metadata": {
-                "description": "Password of your IBMid account."
-            }
-        },
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -89,7 +85,6 @@
         },
         "authenticationType": {
             "type": "string",
-            "defaultValue": "password",
             "allowedValues": [
                 "sshPublicKey",
                 "password"
