@@ -2,8 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "_artifactsLocation": {
-            "value": "${artifactsLocationBase}/${git.proj}/${git.tag}/${project.artifactId}/src/main/"
+        "ibmUserId": {
+            "value": "${ibmUserId}"
+        },
+        "ibmUserPwd": {
+            "value": "${ibmUserPwd}"
+        },
+        "vmImageId": {
+            "value": "${vmImageId}"
         },
         "numberOfNodes": {
             "value": "${numberOfNodes}"
@@ -19,27 +25,6 @@
         },
         "vmAdminPwd": {
             "value": "${vmAdminPwd}"
-        },
-        "adminUser": {
-            "value": "${adminUser}"
-        },
-        "adminPwd": {
-            "value": "${adminPwd}"
-        },
-        "clusterName": {
-            "value": "${clusterName}"
-        },
-		"nodeGroupName": {
-			"value": "${nodeGroupName}"
-        },
-        "coreGroupName": {
-			"value": "${coreGroupName}"
-        },
-        "dmgrHostName": {
-			"value": "${dmgrHostName}"
-        },
-        "dmgrPort": {
-			"value": "${dmgrPort}"
         },
         "vNetName": {
             "value": "${vNetName}"

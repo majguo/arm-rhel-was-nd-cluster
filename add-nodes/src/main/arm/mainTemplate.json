@@ -2,17 +2,21 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "_artifactsLocation": {
-            "type": "string",
-            "defaultValue": "[deployment().properties.templateLink.uri]"
-        },
-        "_artifactsLocationSasToken": {
-            "type": "securestring",
-            "defaultValue": ""
-        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]"
+        },
+        "ibmUserId": {
+            "type": "string",
+            "metadata": {
+                "description": "Username of your IBMid account."
+            }
+        },
+        "ibmUserPwd": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password of your IBMid account."
+            }
         },
         "numberOfNodes": {
             "type": "int"
@@ -21,6 +25,10 @@
             "type": "string"
         },
         "dnsLabelPrefix": {
+            "type": "string"
+        },
+        "vmImageId": {
+            "defaultValue": "",
             "type": "string"
         },
         "vmSize": {
@@ -37,27 +45,6 @@
         "vmAdminPwd": {
             "type": "securestring"
         },
-        "adminUser": {
-            "type": "string"
-        },
-        "adminPwd": {
-            "type": "securestring"
-        },
-        "clusterName": {
-            "type": "string"
-        },
-        "nodeGroupName": {
-            "type": "string"
-        },
-        "coreGroupName": {
-            "type": "string"
-        },
-        "dmgrHostName": {
-            "type": "string"
-        },
-        "dmgrPort": {
-            "type": "string"
-        },
         "vNetName": {
             "type": "string"
         },
@@ -70,10 +57,8 @@
         }
     },
     "variables": {
-        "const_arguments": "[concat(' -m ',parameters('adminUser'),' -c ',parameters('adminPwd'),' -s ',parameters('clusterName'),' -d ',parameters('nodeGroupName'),' -r ',parameters('coreGroupName'),' -h ',parameters('dmgrHostName'),' -o ',parameters('dmgrPort'))]",
         "const_dnsLabelPrefix": "[concat(parameters('dnsLabelPrefix'), take(replace(parameters('guidValue'),'-',''),6))]",
         "const_managedVMPrefix": "[concat(parameters('managedVMPrefix'), take(replace(parameters('guidValue'),'-',''),6), 'VM')]",
-        "const_scriptLocation": "[uri(parameters('_artifactsLocation'), 'scripts/')]",
         "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]"
     },
     "resources": [
@@ -160,10 +145,7 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "microsoft_javaeeonazure_test",
-                        "offer": "rhel74-was-jdk-preview",
-                        "sku": "905",
-                        "version": "9.0.5"
+                        "id": "[parameters('vmImageId')]"
                     },
                     "osDisk": {
                         "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '-disk')]",
@@ -176,7 +158,8 @@
                 "osProfile": {
                     "computerName": "[concat(variables('const_managedVMPrefix'), copyIndex(1))]",
                     "adminUsername": "[parameters('vmAdminId')]",
-                    "adminPassword": "[parameters('vmAdminPwd')]"
+                    "adminPassword": "[parameters('vmAdminPwd')]",
+                    "customData": "[base64(concat(parameters('ibmUserId'), ' ', parameters('ibmUserPwd')))]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -184,39 +167,6 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('const_managedVMPrefix'), copyIndex(1), '-if'))]"
                         }
                     ]
-                }
-            },
-            "plan": {
-                "name": "905",
-                "publisher": "microsoft_javaeeonazure_test",
-                "product": "rhel74-was-jdk-preview"
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2019-03-01",
-            "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '/install')]",
-            "location": "[parameters('location')]",
-            "copy": {
-                "name": "virtualMachineExtensionLoop",
-                "count": "[parameters('numberOfNodes')]"
-            },
-            "dependsOn": [
-                "virtualMachineLoop"
-            ],
-            "properties": {
-                "autoUpgradeMinorVersion": true,
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "settings": {
-                    "fileUris": [
-                        "[uri(variables('const_scriptLocation'), concat('install.sh', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('add-to-cluster.py', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('enable-hpel.template', parameters('_artifactsLocationSasToken')))]",
-                        "[uri(variables('const_scriptLocation'), concat('get_custom_property.py', parameters('_artifactsLocationSasToken')))]"
-                    ],
-                    "commandToExecute": "[concat('sh install.sh', variables('const_arguments'))]"
                 }
             }
         }
