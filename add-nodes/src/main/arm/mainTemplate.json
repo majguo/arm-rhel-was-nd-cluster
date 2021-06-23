@@ -27,10 +27,6 @@
         "dnsLabelPrefix": {
             "type": "string"
         },
-        "vmImageId": {
-            "defaultValue": "",
-            "type": "string"
-        },
         "vmSize": {
             "type": "string",
             "defaultValue": "Standard_D2_v3"
@@ -145,7 +141,10 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "id": "[parameters('vmImageId')]"
+                        "publisher": "${image.publisher}",
+                        "offer": "${image.offer}",
+                        "sku": "${image.sku}",
+                        "version": "${image.version}"
                     },
                     "osDisk": {
                         "name": "[concat(variables('const_managedVMPrefix'), copyIndex(1), '-disk')]",
@@ -168,6 +167,11 @@
                         }
                     ]
                 }
+            },
+            "plan": {
+                "name": "${image.sku}",
+                "publisher": "${image.publisher}",
+                "product": "${image.offer}"
             }
         }
     ]

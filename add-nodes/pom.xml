@@ -37,5 +37,12 @@
         <!-- `tracking.pid` is deprecated, use `template.pid.properties.url` & `template.microsoft.pid.properties.url` instead -->
         <tracking.pid>pid-8dce0bb2-67ed-5ac5-a3e6-d9331d86ed52</tracking.pid>
         <template.validation.tests.directory>${basedir}/../../arm-ttk/arm-ttk</template.validation.tests.directory>
+        <!-- This is the "Partner ID" in Partner Center" -->
+        <image.publisher>microsoft_javaeeonazure_test</image.publisher>
+        <!-- This is the "Offer ID" of the "Azure Virtual Machine" offer type -->
+        <image.offer>2021-zheng-image-offer-preview</image.offer>
+        <!-- This is the "Plan ID" of the plan within the "Azure Virtual Machine" offer -->
+        <image.sku>2021-zheng-rhel-with-ihs</image.sku>
+        <image.version>latest</image.version>
     </properties>
 </project>

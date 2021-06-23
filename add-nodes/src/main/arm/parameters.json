@@ -8,9 +8,6 @@
         "ibmUserPwd": {
             "value": "${ibmUserPwd}"
         },
-        "vmImageId": {
-            "value": "${vmImageId}"
-        },
         "numberOfNodes": {
             "value": "${numberOfNodes}"
         },
